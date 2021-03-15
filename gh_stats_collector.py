@@ -17,6 +17,8 @@ from github import (
     Repository,
 )
 
+from utils.connection import connect_to_db
+
 __VERSION__ = '0.1'
 
 
