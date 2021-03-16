@@ -1,14 +1,5 @@
 #!/usr/bin/python3
-# Copyright: (c) 2020, Andrew Klychkov (@Andersson007) <aaklychkov@mail.ru>
-# MIT License
-#
-# Requirements:
-# 1. pip3 install PyGithub
-# 2. GitHub access token
-#
-# Example:
-# ./issue_copier.py -t your_github_token_here \
-# -s ansible/ansible -d Andersson007/test_repo -i 51399
+# Copyright: (c) 2021, Andrew Klychkov (@Andersson007) <aklychko@redhat.com>
 
 from argparse import ArgumentParser
 
