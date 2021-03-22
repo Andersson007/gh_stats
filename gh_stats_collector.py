@@ -57,7 +57,7 @@ def extract_repos(cli_arg: str) -> list:
 
 def get_repos_from_db(cursor: PgCursor) -> list:
     """Get a repo list from the database."""
-    res = exec_in_db(cursor, 'SELECT name FROM repos', ret_all=True)
+    res = exec_in_db(cursor, 'SELECT name FROM repos')
 
     if res:
         return [elem[0] for elem in res]
@@ -66,13 +66,13 @@ def get_repos_from_db(cursor: PgCursor) -> list:
 
 def add_repo_to_db(cursor: PgCursor, repo_name: str):
     """Add a repo to our database."""
-    exec_in_db(cursor, 'INSERT INTO repos (name) VALUES (%s)', (repo_name,))
+    exec_in_db(cursor, 'INSERT INTO repos (name) VALUES (%s)', (repo_name,),
+               ret_all=False)
 
 
 def get_repo_id(cursor: PgCursor, repo_name: str) -> int:
     """Get a repo ID from the database."""
-    res = exec_in_db(cursor, 'SELECT id FROM repos WHERE name = %s', (repo_name,),
-                     ret_all=True)
+    res = exec_in_db(cursor, 'SELECT id FROM repos WHERE name = %s', (repo_name,))
     if res:
         return res[0][0]
     return None
@@ -80,8 +80,7 @@ def get_repo_id(cursor: PgCursor, repo_name: str) -> int:
 
 def get_contributor_id(cursor: PgCursor, login: str) -> int:
     """Get a contributor ID from the database."""
-    res = exec_in_db(cursor, 'SELECT id FROM contributors WHERE login = %s', (login,),
-                     ret_all=True)
+    res = exec_in_db(cursor, 'SELECT id FROM contributors WHERE login = %s', (login,))
     if res:
         return res[0][0]
     return None
@@ -89,8 +88,7 @@ def get_contributor_id(cursor: PgCursor, login: str) -> int:
 
 def get_commit_id(cursor: PgCursor, sha: str) -> int:
     """Get a commit ID from the database."""
-    res = exec_in_db(cursor, 'SELECT id FROM commits WHERE sha = %s', (sha,),
-                     ret_all=True)
+    res = exec_in_db(cursor, 'SELECT id FROM commits WHERE sha = %s', (sha,))
     if res:
         return res[0][0]
     return None
@@ -99,8 +97,7 @@ def get_commit_id(cursor: PgCursor, sha: str) -> int:
 def get_branch_id(cursor, branch_name: str, repo_id: int) -> int:
     """Get a branch ID from the database."""
     query = 'SELECT id FROM branches WHERE name = %s AND repo_id = %s'
-    res = exec_in_db(cursor, query, (branch_name, repo_id,),
-                     ret_all=True)
+    res = exec_in_db(cursor, query, (branch_name, repo_id,))
     if res:
         return res[0][0]
     return None
@@ -109,7 +106,7 @@ def get_branch_id(cursor, branch_name: str, repo_id: int) -> int:
 def get_tag_id(cursor: PgCursor, repo_id: int, tag_name: str) -> int:
     """Get a tag ID from the database."""
     query = ('SELECT id FROM tags WHERE repo_id = %s AND name = %s')
-    res = exec_in_db(cursor, query, (repo_id, tag_name), ret_all=True)
+    res = exec_in_db(cursor, query, (repo_id, tag_name))
 
     if res:
         return res[0][0]
@@ -121,13 +118,13 @@ def add_tag_to_db(cursor: PgCursor, repo_id: int, tag_name: str,
     query = ('INSERT INTO tags (repo_id, name, tarball, commit_id) '
              'VALUES (%s, %s, %s, %s)')
     args = (repo_id, tag_name, tarball, commit_id,)
-    exec_in_db(cursor, query, args)
+    exec_in_db(cursor, query, args, ret_all=False)
 
 
 def add_contributor_to_db(cursor: PgCursor, login: str, name: str, email: str):
     query = ('INSERT INTO contributors (login, name, email) '
              'VALUES (%s, %s, %s)')
-    exec_in_db(cursor, query, (login, name, email))
+    exec_in_db(cursor, query, (login, name, email), ret_all=False)
 
 
 def add_commit_to_db(cursor: PgCursor, sha: str, contributor_id: int,
@@ -135,13 +132,13 @@ def add_commit_to_db(cursor: PgCursor, sha: str, contributor_id: int,
     query = ('INSERT INTO commits (sha, author_id, repo_id, ts, branch_id) '
              'VALUES (%s, %s, %s, %s, %s)')
     args = (sha, contributor_id, repo_id, commit_ts, branch_id)
-    exec_in_db(cursor, query, args)
+    exec_in_db(cursor, query, args, ret_all=False)
 
 
 def add_branch_to_db(cursor: PgCursor, name: str, repo_id: int):
     query = ('INSERT INTO branches (name, repo_id) '
              'VALUES (%s, %s)')
-    exec_in_db(cursor, query, (name, repo_id))
+    exec_in_db(cursor, query, (name, repo_id), ret_all=False)
 
 
 def handle_commits(cursor: PgCursor, repo: Repository, branch_name: str):

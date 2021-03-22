@@ -8,6 +8,7 @@ from argparse import ArgumentParser
 from psycopg2.extensions import connection
 
 from utils.connection import connect_to_db
+from utils.ghstat_db import GhStatDb
 
 __VERSION__ = '0.1'
 
@@ -29,8 +30,34 @@ def get_cli_args():
     return parser.parse_args()
 
 
-def handle_user_input(user_input: str):
-    print(user_input)
+def show_available_commands():
+    COMMANDS = [
+        'ls             -- show repo list',
+        'CTRL+D         -- exit',
+        'exit / quit    -- exit',
+        '? / help       -- show this message',
+    ]
+
+    HEADER = ('Command | Description')
+
+    print(HEADER)
+    for command in COMMANDS:
+        print('ls -- show repo list')
+
+
+def print_repos(ghstat_db: GhStatDb):
+    cnt = 1
+    for repo in ghstat_db.get_repos():
+        print('[%s] %s' % (cnt, repo[0]))
+        cnt += 1
+
+
+def handle_user_input(ghstat_db: GhStatDb, user_input: str):
+    if user_input in ('?', 'help'):
+        show_available_commands()
+
+    elif user_input == 'ls':
+        print_repos(ghstat_db)
 
 
 def _exit(conn: connection, rc=0, msg=''):
@@ -55,6 +82,8 @@ def main():
                                      password=cli_args.password,
                                      autocommit=False)
 
+        ghstat_db = GhStatDb(cursor)
+
         while True:
 
             user_input = input('gstat> ')
@@ -62,7 +91,7 @@ def main():
             if user_input.strip() in ('quit', 'exit'):
                 _exit(conn)
 
-            handle_user_input(user_input)
+            handle_user_input(ghstat_db, user_input)
 
     except KeyboardInterrupt:
         _exit(conn)

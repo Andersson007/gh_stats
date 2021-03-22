@@ -33,7 +33,7 @@ def connect_to_db(database: str, user: str, password: str, autocommit=False) -> 
 
 
 def exec_in_db(curs: cursor, statement: str,
-               args=(), ret_all=False) -> list:
+               args=(), ret_all=True) -> list:
     """Execute a statement in a database."""
     try:
         curs.execute(statement, args)
