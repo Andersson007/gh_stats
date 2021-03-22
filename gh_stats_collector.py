@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 # Copyright: (c) 2021, Andrew Klychkov (@Andersson007) <aklychko@redhat.com>
 
+import sys
+
 from argparse import ArgumentParser
 
 from github import (
@@ -207,49 +209,56 @@ def handle_tags(cursor: PgCursor, repo: Repository):
 
 
 def main():
-    # Get command-line arguments
-    cli_args = get_cli_args()
 
-    # Connect to database
-    conn, cursor = connect_to_db(database=cli_args.database,
-                                 user=cli_args.user,
-                                 password=cli_args.password,
-                                 autocommit=True)
+    try:
+        # Get command-line arguments
+        cli_args = get_cli_args()
 
-    repos_in_db = get_repos_from_db(cursor)
+        # Connect to database
+        conn, cursor = connect_to_db(database=cli_args.database,
+                                     user=cli_args.user,
+                                     password=cli_args.password,
+                                     autocommit=True)
 
-    # Create github object and set access token
-    gh = Github(cli_args.token)
+        repos_in_db = get_repos_from_db(cursor)
 
-    # Handle repos
-    repos_needed = None
-    if cli_args.repo:
-        repos_needed = extract_repos(cli_args.repo)
+        # Create github object and set access token
+        gh = Github(cli_args.token)
 
-    # Get orgs
-    gh_org = gh.get_organization(cli_args.org)
+        # Handle repos
+        repos_needed = None
+        if cli_args.repo:
+            repos_needed = extract_repos(cli_args.repo)
 
-    # Get repos from GH and do main job
-    for repo in gh_org.get_repos():
-        # Skip what we don't need
-        if repos_needed and repo.name not in repos_needed:
-            continue
+        # Get orgs
+        gh_org = gh.get_organization(cli_args.org)
 
-        # If we don't have it now, add repo to DB
-        if repo.name not in repos_in_db:
-            add_repo_to_db(cursor, repo.name)
+        # Get repos from GH and do main job
+        for repo in gh_org.get_repos():
+            # Skip what we don't need
+            if repos_needed and repo.name not in repos_needed:
+                continue
 
-        # Get branches
-        branches = repo.get_branches()
-        for branch in branches:
-            # Handle commits
-            handle_commits(cursor, repo, branch.name)
+            # If we don't have it now, add repo to DB
+            if repo.name not in repos_in_db:
+                add_repo_to_db(cursor, repo.name)
 
-        # Handle tags
-        handle_tags(cursor, repo)
+            # Get branches
+            branches = repo.get_branches()
+            for branch in branches:
+                # Handle commits
+                handle_commits(cursor, repo, branch.name)
+
+            # Handle tags
+            handle_tags(cursor, repo)
+
+    except KeyboardInterrupt:
+        print(' Interrupted')
+        sys.exit(0)
 
     # DB close connection
     conn.close()
+    sys.exit(0)
 
 
 if __name__ == '__main__':
