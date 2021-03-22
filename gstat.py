@@ -5,12 +5,9 @@ import sys
 
 from argparse import ArgumentParser
 
-from psycopg2.extensions import cursor as PgCursor
+from psycopg2.extensions import connection
 
-from utils.connection import (
-    connect_to_db,
-    exec_in_db,
-)
+from utils.connection import connect_to_db
 
 __VERSION__ = '0.1'
 
@@ -32,6 +29,21 @@ def get_cli_args():
     return parser.parse_args()
 
 
+def handle_user_input(user_input: str):
+    print(user_input)
+
+
+def _exit(conn: connection, rc=0, msg=''):
+    if msg == '':
+        msg = 'bye'
+
+    if rc == 0:
+        if msg is not None:
+            print(msg)
+
+        sys.exit(0)
+
+
 def main():
     try:
         # Get command-line arguments
@@ -43,14 +55,22 @@ def main():
                                      password=cli_args.password,
                                      autocommit=False)
 
-    except KeyboardInterrupt:
-        # TODO Change it, not to exit the programm,
-        # implement it via "exit"
-        print(' Interrupted')
-        sys.exit(0)
+        while True:
 
-    conn.close()
-    sys.exit(0)
+            user_input = input('gstat> ')
+
+            if user_input.strip() in ('quit', 'exit'):
+                _exit(conn)
+
+            handle_user_input(user_input)
+
+    except KeyboardInterrupt:
+        _exit(conn)
+
+    except EOFError:
+        _exit(conn)
+
+    _exit(conn)
 
 
 if __name__ == '__main__':
