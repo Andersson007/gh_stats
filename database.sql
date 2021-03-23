@@ -40,3 +40,7 @@ ALTER TABLE tags ADD CONSTRAINT fk_commit_id FOREIGN KEY (commit_id) REFERENCES 
 -- SELECT t.name AS "Release Version", c.ts AS "Release Date", a.login AS "Release Manager" FROM tags AS t LEFT JOIN commits AS c ON c.id = t.commit_id LEFT JOIN contributors AS a ON a.id = c.author_id LEFT JOIN repos AS r ON r.id = t.repo_id WHERE r.name = 'community.mysql'
 
 -- SELECT t.name AS "Release Version", c.ts AS "Release Date", a.login AS "Release Manager", (SELECT NOW() - c.ts) AS "How long ago" FROM tags AS t LEFT JOIN commits AS c ON c.id = t.commit_id LEFT JOIN contributors AS a ON a.id = c.author_id LEFT JOIN repos AS r ON r.id = t.repo_id WHERE r.name = 'ansible.posix';
+
+-- SELECT DISTINCT r.name AS "repo name" FROM repos AS r WHERE r.id not in (SELECT repo_id FROM commits);
+
+-- SELECT r.name AS "Repo Name", max(c.ts) AS "Latest Release" FROM tags AS t LEFT JOIN commits AS c ON c.id = t.commit_id LEFT JOIN repos AS r ON r.id = t.repo_id GROUP BY "Repo Name" HAVING max(c.ts) < (SELECT now() - '6 month'::interval);

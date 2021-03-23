@@ -12,7 +12,8 @@ from utils.ghstat_db import GhStatDb
 
 __VERSION__ = '0.1'
 
-repo_list = []
+repo_set = set()
+current_repo = 'root'
 
 
 def get_cli_args():
@@ -35,6 +36,7 @@ def get_cli_args():
 def show_available_commands():
     COMMANDS = [
         'ls             -- show repo list',
+        'use REPONAME   -- select a repo',
         'CTRL+D         -- exit',
         'exit / quit    -- exit',
         '? / help       -- show this message',
@@ -47,19 +49,42 @@ def show_available_commands():
         print('ls -- show repo list')
 
 
-def print_repos(ghstat_db: GhStatDb):
+def print_repos(repo_set: set):
     cnt = 1
-    for repo in ghstat_db.get_repos():
+    repo_list = sorted(list(repo_set))
+    for repo in repo_list:
         print('[%s] %s' % (cnt, repo))
         cnt += 1
 
 
-def handle_user_input(ghstat_db: GhStatDb, user_input: str):
+def print_branches(ghstat_db: GhStatDb):
+    cnt = 1
+    for branch in ghstat_db.get_branches():
+        print('[%s] %s' % (cnt, branch[0]))
+        cnt += 1
+
+
+def handle_user_input(ghstat_db: GhStatDb, repo_set: set, user_input: str):
+    global current_repo
+
     if user_input in ('?', 'help'):
         show_available_commands()
 
     elif user_input == 'ls':
-        print_repos(ghstat_db)
+        print_repos(repo_set)
+
+    elif user_input[:3] == 'use':
+        current_repo = user_input.split()[1]
+        if current_repo not in repo_set:
+            print('%s repo does not exist, please '
+                  'run "ls" to see all availabe '
+                  'repos and try again' % current_repo)
+            return
+
+        ghstat_db.set_repo(current_repo)
+
+    elif user_input == 'b':
+        print_branches(ghstat_db)
 
 
 def _exit(conn: connection, rc=0, msg=''):
@@ -86,21 +111,17 @@ def main():
 
         ghstat_db = GhStatDb(cursor)
 
-        # 1) Get available repos
-        # 2) Pass it to a global variable
-        # 3) Set a default root, e.g. 'gstat'
-        # 4) handle_user_input looks into repo list
-        # 5) if there's the desired repo, will change the default path
-        # 6) if no, print a message to repeate the input
+        global repo_set
+        repo_set = set(ghstat_db.get_repos())
 
         while True:
 
-            user_input = input('gstat> ')
+            user_input = input('%s> ' % current_repo)
 
             if user_input.strip() in ('quit', 'exit'):
                 _exit(conn)
 
-            handle_user_input(ghstat_db, user_input)
+            handle_user_input(ghstat_db, repo_set, user_input)
 
     except KeyboardInterrupt:
         _exit(conn)
