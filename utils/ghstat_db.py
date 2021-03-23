@@ -17,4 +17,5 @@ class GhStatDb():
         self.exec_in_db = exec_in_db
 
     def get_repos(self):
-        return self.exec_in_db(self.cursor, 'SELECT name FROM repos')
+        res = self.exec_in_db(self.cursor, 'SELECT name FROM repos')
+        return [r[0] for r in res]

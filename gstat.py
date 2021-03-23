@@ -12,6 +12,8 @@ from utils.ghstat_db import GhStatDb
 
 __VERSION__ = '0.1'
 
+repo_list = []
+
 
 def get_cli_args():
     """Get command-line arguments."""
@@ -48,7 +50,7 @@ def show_available_commands():
 def print_repos(ghstat_db: GhStatDb):
     cnt = 1
     for repo in ghstat_db.get_repos():
-        print('[%s] %s' % (cnt, repo[0]))
+        print('[%s] %s' % (cnt, repo))
         cnt += 1
 
 
@@ -83,6 +85,13 @@ def main():
                                      autocommit=False)
 
         ghstat_db = GhStatDb(cursor)
+
+        # 1) Get available repos
+        # 2) Pass it to a global variable
+        # 3) Set a default root, e.g. 'gstat'
+        # 4) handle_user_input looks into repo list
+        # 5) if there's the desired repo, will change the default path
+        # 6) if no, print a message to repeate the input
 
         while True:
 
