@@ -37,6 +37,11 @@ def get_cli_args():
                         help='GitHub repository name or comma-separated list of names',
                         metavar='REPO_NAME')
 
+    # Get data from a certain repo / repos
+    parser.add_argument('-b', '--branches-only', dest='branches_only', required=False,
+                        help='Fetch branches only',
+                        action='store_true')
+
     # DB connection related parameters
     parser.add_argument('-d', '--database', dest='database', required=True,
                         help='Database name to connect to', metavar='DBNAME')
@@ -141,8 +146,7 @@ def add_branch_to_db(cursor: PgCursor, name: str, repo_id: int):
     exec_in_db(cursor, query, (name, repo_id), ret_all=False)
 
 
-def handle_commits(cursor: PgCursor, repo: Repository, branch_name: str):
-    commits = repo.get_commits(sha=branch_name)
+def handle_commits(cursor: PgCursor, repo: Repository, branch_name: str, branches_only=False):
 
     repo_id = get_repo_id(cursor, repo.name)
 
@@ -150,6 +154,11 @@ def handle_commits(cursor: PgCursor, repo: Repository, branch_name: str):
     if branch_id is None:
         add_branch_to_db(cursor, branch_name, repo_id)
         branch_id = get_branch_id(cursor, branch_name, repo_id)
+
+    if branches_only:
+        return
+
+    commits = repo.get_commits(sha=branch_name)
 
     for commit in commits:
         # print(commit.raw_data['commit']['committer']['name'])
@@ -244,7 +253,11 @@ def main():
             branches = repo.get_branches()
             for branch in branches:
                 # Handle commits
-                handle_commits(cursor, repo, branch.name)
+                handle_commits(cursor, repo, branch.name,
+                               branches_only=cli_args.branches_only)
+
+            if cli_args.branches_only:
+                continue
 
             # Handle tags
             handle_tags(cursor, repo)
