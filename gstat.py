@@ -37,6 +37,7 @@ def show_available_commands():
     COMMANDS = [
         'ls             -- show repo list',
         'use REPONAME   -- select a repo',
+        'b              -- print branches',
         'CTRL+D         -- exit',
         'exit / quit    -- exit',
         '? / help       -- show this message',
@@ -64,6 +65,15 @@ def print_branches(ghstat_db: GhStatDb):
         cnt += 1
 
 
+def show_global_release_stats(ghstat_db: GhStatDb):
+    for row in ghstat_db.get_global_release_stats():
+        print('%s' % row)
+
+
+def show_repo_release_stats(ghstat_db: GhStatDb):
+    pass
+
+
 def handle_user_input(ghstat_db: GhStatDb, repo_set: set, user_input: str):
     global current_repo
 
@@ -73,6 +83,12 @@ def handle_user_input(ghstat_db: GhStatDb, repo_set: set, user_input: str):
     elif user_input == 'ls':
         print_repos(repo_set)
 
+    elif user_input == 'show release stats':
+        if ghstat_db is None:
+            show_global_release_stats(ghstat_db)
+        else:
+            show_repo_release_stats(ghstat_db)
+
     elif user_input[:3] == 'use':
         current_repo = user_input.split()[1]
         if current_repo not in repo_set:
@@ -81,10 +97,16 @@ def handle_user_input(ghstat_db: GhStatDb, repo_set: set, user_input: str):
                   'repos and try again' % current_repo)
             return
 
-        ghstat_db.set_repo(current_repo)
+        if current_repo != 'root':
+            ghstat_db.set_repo(current_repo)
+        else:
+            ghstat_db.set_repo(None)
 
     elif user_input == 'b':
-        print_branches(ghstat_db)
+        if ghstat_db.repo is not None:
+            print_branches(ghstat_db)
+        else:
+            print('repo is not set, run "use repo.name" to choose')
 
 
 def _exit(conn: connection, rc=0, msg=''):

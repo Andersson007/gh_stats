@@ -44,3 +44,15 @@ ALTER TABLE tags ADD CONSTRAINT fk_commit_id FOREIGN KEY (commit_id) REFERENCES 
 -- SELECT DISTINCT r.name AS "repo name" FROM repos AS r WHERE r.id not in (SELECT repo_id FROM commits);
 
 -- SELECT r.name AS "Repo Name", max(c.ts) AS "Latest Release" FROM tags AS t LEFT JOIN commits AS c ON c.id = t.commit_id LEFT JOIN repos AS r ON r.id = t.repo_id GROUP BY "Repo Name" HAVING max(c.ts) < (SELECT now() - '6 month'::interval);
+
+-- SELECT r.name AS "Repo Name", max(c.ts) AS "Latest Commit" FROM commits AS c LEFT JOIN repos AS r ON r.id = c.repo_id GROUP BY "Repo Name" HAVING max(c.ts) < (SELECT now() - '5 month'::interval) ORDER BY "Latest Commit";
+
+-- SELECT max(c.ts) AS "Latest Commit" FROM commits AS c LEFT JOIN repos AS r ON r.id = c.repo_id WHERE r.name = 'community.digitalocean';
+
+-- SELECT count(c.ts) AS "Commit number" FROM commits AS c LEFT JOIN repos AS r ON r.id = c.repo_id WHERE r.name = 'community.digitalocean' AND c.ts > (SELECT now() - '6 month'::interval);
+
+-- SELECT count(c.ts) AS "Commit number" FROM commits AS c LEFT JOIN repos AS r ON r.id = c.repo_id WHERE r.name = 'splunk.enterprise_security' AND c.ts > '2019-08-28 19:39:27';
+
+-- SELECT r.name FROM repos AS r WHERE r.id in (SELECT b.repo_id FROM branches AS b GROUP BY b.repo_id HAVING count(b.repo_id) > 1) ORDER BY r.name;
+
+-- SELECT DISTINCT r.name, ARRAY(SELECT b.name FROM branches b JOIN repos re ON re.id = b.repo_id WHERE re.name = r.name) FROM branches AS b LEFT JOIN repos AS r ON r.id = b.repo_id GROUP BY b.name, r.name ORDER BY r.name;

@@ -29,3 +29,7 @@ class GhStatDb():
                  'LEFT JOIN repos AS r ON r.id = b.repo_id '
                  'WHERE r.name = %s ORDER BY b.name')
         return self.exec_in_db(self.cursor, query, (self.repo,))
+
+    def get_global_release_stats(self):
+        # TODO
+        return [1]
