@@ -37,6 +37,7 @@ def show_available_commands():
     COMMANDS = [
         'ls             -- show repo list',
         'use REPONAME   -- select a repo',
+        'r              -- show release stats',
         'b              -- print branches',
         'CTRL+D         -- exit',
         'exit / quit    -- exit',
@@ -47,7 +48,7 @@ def show_available_commands():
 
     print(HEADER)
     for command in COMMANDS:
-        print('ls -- show repo list')
+        print(command)
 
 
 def print_repos(repo_set: set):
@@ -83,15 +84,16 @@ def handle_user_input(ghstat_db: GhStatDb, repo_set: set, user_input: str):
     elif user_input == 'ls':
         print_repos(repo_set)
 
-    elif user_input == 'show release stats':
-        if ghstat_db is None:
+    elif user_input == 'r':
+        if ghstat_db.repo is None:
             show_global_release_stats(ghstat_db)
         else:
             show_repo_release_stats(ghstat_db)
 
     elif user_input[:3] == 'use':
         current_repo = user_input.split()[1]
-        if current_repo not in repo_set:
+
+        if current_repo not in repo_set or current_repo != 'root':
             print('%s repo does not exist, please '
                   'run "ls" to see all availabe '
                   'repos and try again' % current_repo)
