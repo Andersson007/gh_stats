@@ -7,6 +7,8 @@ from argparse import ArgumentParser
 
 from psycopg2.extensions import connection
 
+from tabulate import tabulate
+
 from utils.connection import connect_to_db
 from utils.ghstat_db import GhStatDb
 
@@ -66,9 +68,20 @@ def print_branches(ghstat_db: GhStatDb):
         cnt += 1
 
 
-def show_global_release_stats(ghstat_db: GhStatDb):
-    for row in ghstat_db.get_global_release_stats():
-        print('%s' % row)
+def show_global_release_stats(ghstat_db: GhStatDb, months_ago=0):
+    result = ghstat_db.get_global_release_stats(months_ago)
+
+    output = []
+    for repo in result:
+        tag_date = result[repo]['tag'].strftime('%d-%m-%Y')
+
+        if result[repo].get('commit'):
+            commit_date = result[repo]['commit'].strftime('%d-%m-%Y')
+        else:
+            commit_date = None
+        output.append([repo, tag_date, commit_date])
+
+    print(tabulate(output, headers=['Repo', 'Tag', 'Commit'], tablefmt='github'))
 
 
 def show_repo_release_stats(ghstat_db: GhStatDb):
@@ -84,11 +97,17 @@ def handle_user_input(ghstat_db: GhStatDb, repo_set: set, user_input: str):
     elif user_input == 'ls':
         print_repos(repo_set)
 
-    elif user_input == 'r':
+    elif user_input and user_input[0] == 'r':
+        months_ago = 0
+        if len(user_input) > 2:
+            tmp = user_input.split()
+            if len(tmp) >= 2:
+                months_ago = int(tmp[1])
+
         if ghstat_db.repo is None:
-            show_global_release_stats(ghstat_db)
+            show_global_release_stats(ghstat_db, months_ago)
         else:
-            show_repo_release_stats(ghstat_db)
+            show_repo_release_stats(ghstat_db, months_ago)
 
     elif user_input[:3] == 'use':
         current_repo = user_input.split()[1]
@@ -109,6 +128,9 @@ def handle_user_input(ghstat_db: GhStatDb, repo_set: set, user_input: str):
             print_branches(ghstat_db)
         else:
             print('repo is not set, run "use repo.name" to choose')
+
+    elif user_input != '':
+        print('unrecognized command')
 
 
 def _exit(conn: connection, rc=0, msg=''):

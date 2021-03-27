@@ -30,6 +30,44 @@ class GhStatDb():
                  'WHERE r.name = %s ORDER BY b.name')
         return self.exec_in_db(self.cursor, query, (self.repo,))
 
-    def get_global_release_stats(self):
-        # TODO
-        return [1]
+    def get_global_release_stats(self, months_ago=0) -> dict:
+        if not months_ago:
+            query = ('SELECT r.name AS "Repo Name", max(c.ts) AS "Latest Release" '
+                     'FROM tags AS t LEFT JOIN commits AS c ON c.id = t.commit_id '
+                     'LEFT JOIN repos AS r ON r.id = t.repo_id '
+                     'GROUP BY "Repo Name"')
+        else:
+            query = ('SELECT r.name AS "Repo Name", max(c.ts) AS "Latest Release" '
+                     'FROM tags AS t LEFT JOIN commits AS c ON c.id = t.commit_id '
+                     'LEFT JOIN repos AS r ON r.id = t.repo_id '
+                     'GROUP BY "Repo Name" HAVING max(c.ts) < '
+                     '(SELECT now() - \'%s month\'::interval)' % months_ago)
+
+        res = self.exec_in_db(self.cursor, query)
+
+        final_result = {}
+        for row in res:
+            print(row)
+            final_result[row[0]] = {}
+            final_result[row[0]]['tag'] = row[1]
+
+        if not months_ago:
+            query = ('SELECT r.name AS "Repo Name", max(c.ts) AS "Latest Commit" '
+                     'FROM commits AS c LEFT JOIN repos AS r ON r.id = c.repo_id '
+                     'GROUP BY "Repo Name"')
+        else:
+            query = ('SELECT r.name AS "Repo Name", max(c.ts) AS "Latest Commit" '
+                     'FROM commits AS c LEFT JOIN repos AS r ON r.id = c.repo_id '
+                     'GROUP BY "Repo Name" HAVING max(c.ts) < '
+                     '(SELECT now() - \'%s month\'::interval)' % months_ago)
+
+        res = self.exec_in_db(self.cursor, query)
+
+        for row in res:
+            print(row)
+            if row[0] not in final_result:
+                continue
+
+            final_result[row[0]]['commit'] = row[1]
+
+        return final_result

@@ -6,4 +6,4 @@ Collect GitHub statistics and store it in a database
 
 `Python 3`
 
-`pip3 install PyGithub psycopg2-binary`
+`pip3 install PyGithub psycopg2-binary tabulate`
