@@ -30,6 +30,16 @@ class GhStatDb():
                  'WHERE r.name = %s ORDER BY b.name')
         return self.exec_in_db(self.cursor, query, (self.repo,))
 
+    def get_repo_release_stats(self) -> list:
+        query = ('SELECT t.name AS "Release Version", c.ts AS "Release Date", '
+                 'a.login AS "Release Manager", (SELECT NOW() - c.ts) AS "Time elapsed" '
+                 'FROM tags AS t LEFT JOIN commits AS c ON c.id = t.commit_id '
+                 'LEFT JOIN contributors AS a ON a.id = c.author_id '
+                 'LEFT JOIN repos AS r ON r.id = t.repo_id '
+                 'WHERE r.name = %s')
+
+        return self.exec_in_db(self.cursor, query, (self.repo,))
+
     def get_global_release_stats(self, months_ago=0) -> dict:
         if not months_ago:
             query = ('SELECT r.name AS "Repo Name", max(c.ts) AS "Latest Release" '
@@ -47,7 +57,6 @@ class GhStatDb():
 
         final_result = {}
         for row in res:
-            print(row)
             final_result[row[0]] = {}
             final_result[row[0]]['tag'] = row[1]
 

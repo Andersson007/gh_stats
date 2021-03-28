@@ -37,20 +37,17 @@ def get_cli_args():
 
 def show_available_commands():
     COMMANDS = [
-        'ls             -- show repo list',
-        'use REPONAME   -- select a repo',
-        'r              -- show release stats',
-        'b              -- print branches',
-        'CTRL+D         -- exit',
-        'exit / quit    -- exit',
-        '? / help       -- show this message',
+        ['ls', 'show repo list'],
+        ['use REPONAME', 'select a repo'],
+        ['r', 'show release stats'],
+        ['b', 'print branches'],
+        ['CTRL+D', 'exit'],
+        ['exit / quit', 'exit'],
+        ['? / help', 'show this message'],
     ]
 
-    HEADER = ('Command | Description')
-
-    print(HEADER)
-    for command in COMMANDS:
-        print(command)
+    print(tabulate(COMMANDS, headers=['Command', 'Description'],
+          tablefmt='psql'))
 
 
 def print_repos(repo_set: set):
@@ -81,11 +78,18 @@ def show_global_release_stats(ghstat_db: GhStatDb, months_ago=0):
             commit_date = None
         output.append([repo, tag_date, commit_date])
 
-    print(tabulate(output, headers=['Repo', 'Tag', 'Commit'], tablefmt='github'))
+    print(tabulate(output, headers=['Repo', 'Tag', 'Commit'],
+          tablefmt='psql'))
 
 
 def show_repo_release_stats(ghstat_db: GhStatDb):
-    pass
+    result = ghstat_db.get_repo_release_stats()
+
+    # It's a bad way but otherwise tabulate fails later
+    headers = ['Release version', 'Date', 'Engineer', 'Elapsed']
+    result.insert(0, headers)
+
+    print(tabulate(result, headers='firstrow', tablefmt='psql'))
 
 
 def handle_user_input(ghstat_db: GhStatDb, repo_set: set, user_input: str):
@@ -107,13 +111,13 @@ def handle_user_input(ghstat_db: GhStatDb, repo_set: set, user_input: str):
         if ghstat_db.repo is None:
             show_global_release_stats(ghstat_db, months_ago)
         else:
-            show_repo_release_stats(ghstat_db, months_ago)
+            show_repo_release_stats(ghstat_db)
 
     elif user_input[:3] == 'use':
         current_repo = user_input.split()[1]
 
-        if current_repo not in repo_set or current_repo != 'root':
-            print('%s repo does not exist, please '
+        if current_repo not in repo_set and current_repo != 'root':
+            print('"%s" repo does not exist, please '
                   'run "ls" to see all availabe '
                   'repos and try again' % current_repo)
             return
