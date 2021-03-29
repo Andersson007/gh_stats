@@ -33,7 +33,7 @@ ALTER TABLE tags ADD CONSTRAINT fk_commit_id FOREIGN KEY (commit_id) REFERENCES 
 
 -- SELECT r.name AS "repo name", t.name AS "tag name", c.ts AS "date", t.tarball AS released FROM tags AS t LEFT JOIN repos AS r ON t.repo_id = r.id LEFT JOIN commits AS c ON t.commit_id = c.id WHERE r.name = 'community.digitalocean';
 
--- SELECT a.login AS author, a.email, count(c.id) AS commit_number, max(c.st) AS last_commit_time FROM commits AS c LEFT JOIN contributors AS a ON a.id = c.author_id LEFT JOIN repos AS r ON c.repo_id = r.id WHERE r.name = 'community.mysql' GROUP BY c.author_id, a.login, a.email ORDER BY commit_number DESC;
+-- SELECT a.login AS author, a.email, count(c.id) AS commit_number, max(c.ts) AS last_commit_time FROM commits AS c LEFT JOIN contributors AS a ON a.id = c.author_id LEFT JOIN repos AS r ON c.repo_id = r.id WHERE r.name = 'community.mysql' GROUP BY c.author_id, a.login, a.email ORDER BY commit_number DESC;
 
 -- SELECT r.name AS repo, b.name AS branch, a.login AS author, c.ts AS ts_created FROM commits AS c LEFT JOIN repos AS r ON r.id = c.repo_id LEFT JOIN contributors AS a ON c.author_id = a.id LEFT JOIN branches AS b ON b.id = c.branch_id WHERE r.name = 'community.network' AND b.name = 'main' ORDER BY ts_created DESC LIMIT 10;
 

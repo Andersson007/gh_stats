@@ -80,3 +80,14 @@ class GhStatDb():
             final_result[row[0]]['commit'] = row[1]
 
         return final_result
+
+    def get_contributors(self):
+        query = ('SELECT a.login AS "Author", a.email AS "Email", '
+                 'count(c.id) AS "Commit number", max(c.ts) AS "Last commit TS" '
+                 'FROM commits AS c LEFT JOIN contributors AS a '
+                 'ON a.id = c.author_id LEFT JOIN repos AS r '
+                 'ON c.repo_id = r.id WHERE r.name = %s '
+                 'GROUP BY c.author_id, a.login, a.email '
+                 'ORDER BY "Commit number" DESC')
+
+        return self.exec_in_db(self.cursor, query, (self.repo,))

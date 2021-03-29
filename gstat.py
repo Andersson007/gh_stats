@@ -40,6 +40,7 @@ def show_available_commands():
         ['ls', 'show repo list'],
         ['use REPONAME', 'select a repo'],
         ['r', 'show release stats'],
+        ['c', 'show contributors'],
         ['b', 'print branches'],
         ['CTRL+D', 'exit'],
         ['exit / quit', 'exit'],
@@ -86,8 +87,19 @@ def show_repo_release_stats(ghstat_db: GhStatDb):
     result = ghstat_db.get_repo_release_stats()
 
     # It's a bad way but otherwise tabulate fails later
-    headers = ['Release version', 'Date', 'Engineer', 'Elapsed']
-    result.insert(0, headers)
+    headers = [['Release version', 'Date', 'Engineer', 'Elapsed']]
+
+    result = headers + result
+
+    print(tabulate(result, headers='firstrow', tablefmt='psql'))
+
+
+def show_contributors(ghstat_db: GhStatDb):
+    result = ghstat_db.get_contributors()
+
+    headers = [['Author', 'Email', 'Commit number', 'Last commit TS']]
+
+    result = headers + result
 
     print(tabulate(result, headers='firstrow', tablefmt='psql'))
 
@@ -100,6 +112,13 @@ def handle_user_input(ghstat_db: GhStatDb, repo_set: set, user_input: str):
 
     elif user_input == 'ls':
         print_repos(repo_set)
+
+    elif user_input == 'c':
+        if current_repo == 'root':
+            print('repo is not chosen')
+            return
+        else:
+            show_contributors(ghstat_db)
 
     elif user_input and user_input[0] == 'r':
         months_ago = 0
