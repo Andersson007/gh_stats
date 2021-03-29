@@ -7,15 +7,9 @@ from argparse import ArgumentParser
 
 from psycopg2.extensions import connection
 
-from tabulate import tabulate
-
 from utils.connection import connect_to_db
 from utils.ghstat_db import GhStatDb
-
-__VERSION__ = '0.1'
-
-repo_set = set()
-current_repo = 'root'
+from utils.gstat_cli import GStatCli
 
 
 def get_cli_args():
@@ -35,90 +29,20 @@ def get_cli_args():
     return parser.parse_args()
 
 
-def show_available_commands():
-    COMMANDS = [
-        ['ls', 'show repo list'],
-        ['use REPONAME', 'select a repo'],
-        ['r', 'show release stats'],
-        ['c', 'show contributors'],
-        ['b', 'print branches'],
-        ['CTRL+D', 'exit'],
-        ['exit / quit', 'exit'],
-        ['? / help', 'show this message'],
-    ]
-
-    print(tabulate(COMMANDS, headers=['Command', 'Description'],
-          tablefmt='psql'))
-
-
-def print_repos(repo_set: set):
-    cnt = 1
-    repo_list = sorted(list(repo_set))
-    for repo in repo_list:
-        print('[%s] %s' % (cnt, repo))
-        cnt += 1
-
-
-def print_branches(ghstat_db: GhStatDb):
-    cnt = 1
-    for branch in ghstat_db.get_branches():
-        print('[%s] %s' % (cnt, branch[0]))
-        cnt += 1
-
-
-def show_global_release_stats(ghstat_db: GhStatDb, months_ago=0):
-    result = ghstat_db.get_global_release_stats(months_ago)
-
-    output = []
-    for repo in result:
-        tag_date = result[repo]['tag'].strftime('%d-%m-%Y')
-
-        if result[repo].get('commit'):
-            commit_date = result[repo]['commit'].strftime('%d-%m-%Y')
-        else:
-            commit_date = None
-        output.append([repo, tag_date, commit_date])
-
-    print(tabulate(output, headers=['Repo', 'Tag', 'Commit'],
-          tablefmt='psql'))
-
-
-def show_repo_release_stats(ghstat_db: GhStatDb):
-    result = ghstat_db.get_repo_release_stats()
-
-    # It's a bad way but otherwise tabulate fails later
-    headers = [['Release version', 'Date', 'Engineer', 'Elapsed']]
-
-    result = headers + result
-
-    print(tabulate(result, headers='firstrow', tablefmt='psql'))
-
-
-def show_contributors(ghstat_db: GhStatDb):
-    result = ghstat_db.get_contributors()
-
-    headers = [['Author', 'Email', 'Commit number', 'Last commit TS']]
-
-    result = headers + result
-
-    print(tabulate(result, headers='firstrow', tablefmt='psql'))
-
-
-def handle_user_input(ghstat_db: GhStatDb, repo_set: set, user_input: str):
-    global current_repo
+def handle_user_input(gcli: GStatCli, user_input: str):
 
     if user_input in ('?', 'help'):
-        show_available_commands()
+        gcli.show_available_commands()
 
     elif user_input == 'ls':
-        print_repos(repo_set)
+        gcli.print_repos()
 
     elif user_input == 'c':
-        if current_repo == 'root':
+        if gcli.current_repo == 'root':
             print('repo is not chosen')
             return
         else:
-            show_contributors(ghstat_db)
+            gcli.show_contributors()
 
     elif user_input and user_input[0] == 'r':
         months_ago = 0
@@ -127,28 +51,25 @@ def handle_user_input(ghstat_db: GhStatDb, repo_set: set, user_input: str):
             if len(tmp) >= 2:
                 months_ago = int(tmp[1])
 
-        if ghstat_db.repo is None:
-            show_global_release_stats(ghstat_db, months_ago)
+        if gcli.current_repo == 'root':
+            gcli.show_global_release_stats(months_ago)
         else:
-            show_repo_release_stats(ghstat_db)
+            gcli.show_repo_release_stats()
 
     elif user_input[:3] == 'use':
         current_repo = user_input.split()[1]
 
-        if current_repo not in repo_set and current_repo != 'root':
+        if current_repo not in gcli.repo_set and current_repo != 'root':
             print('"%s" repo does not exist, please '
                   'run "ls" to see all availabe '
                   'repos and try again' % current_repo)
             return
 
-        if current_repo != 'root':
-            ghstat_db.set_repo(current_repo)
-        else:
-            ghstat_db.set_repo(None)
+        gcli.set_current_repo(current_repo)
 
     elif user_input == 'b':
-        if ghstat_db.repo is not None:
-            print_branches(ghstat_db)
+        if gcli.current_repo is not None:
+            gcli.print_branches()
         else:
             print('repo is not set, run "use repo.name" to choose')
 
@@ -180,17 +101,15 @@ def main():
 
         ghstat_db = GhStatDb(cursor)
 
-        global repo_set
-        repo_set = set(ghstat_db.get_repos())
+        gcli = GStatCli(ghstat_db)
 
         while True:
-
-            user_input = input('%s> ' % current_repo)
+            user_input = input('%s> ' % gcli.current_repo)
 
             if user_input.strip() in ('quit', 'exit'):
                 _exit(conn)
 
-            handle_user_input(ghstat_db, repo_set, user_input)
+            handle_user_input(gcli, user_input)
 
     except KeyboardInterrupt:
         _exit(conn)
