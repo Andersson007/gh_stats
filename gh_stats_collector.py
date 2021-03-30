@@ -217,6 +217,15 @@ def handle_tags(cursor: PgCursor, repo: Repository):
 def main():
 
     try:
+        #if sys.stdin and len(sys.argv) == 1:
+        # We should pass:
+        # 1) what to do (like fetch data from GH and update the DB)
+        # 2) with what (e.g. with a collection)
+        # 3) connection params
+        # if everything is correct
+        # 4) set up a flag not to use get_cli_args()
+        # but define it here
+
         # Get command-line arguments
         cli_args = get_cli_args()
 
