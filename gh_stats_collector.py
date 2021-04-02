@@ -3,7 +3,8 @@
 
 import sys
 
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
+from configparser import ConfigParser
 
 from github import (
     Github,
@@ -24,35 +25,120 @@ def get_cli_args():
     """Get command-line arguments."""
     parser = ArgumentParser(description='.')
 
+    # Config
+    parser.add_argument('-c', '--config', dest='config',
+                        help='Path to config file', metavar='PATH')
+
     # Access token
-    parser.add_argument('-t', '--token', dest='token', required=True,
+    parser.add_argument('-t', '--token', dest='token',
                         help='GitHub access token', metavar='TOKEN')
 
     # GH organization
-    parser.add_argument('-o', '--org', dest='org', required=True,
+    parser.add_argument('-o', '--org', dest='org',
                         help='GitHub organization name', metavar='ORG')
 
     # Get data from a certain repo / repos
-    parser.add_argument('-r', '--repo', dest='repo', required=False,
+    parser.add_argument('-r', '--repo', dest='repo',
                         help='GitHub repository name or comma-separated list of names',
                         metavar='REPO_NAME')
 
     # Get data from a certain repo / repos
-    parser.add_argument('-b', '--branches-only', dest='branches_only', required=False,
+    parser.add_argument('-b', '--branches-only', dest='branches_only',
                         help='Fetch branches only',
                         action='store_true')
 
     # DB connection related parameters
-    parser.add_argument('-d', '--database', dest='database', required=True,
+    parser.add_argument('-d', '--database', dest='database',
                         help='Database name to connect to', metavar='DBNAME')
 
-    parser.add_argument('-u', '--user', dest='user', required=True,
+    parser.add_argument('-u', '--user', dest='user',
                         help='Database user to log in with', metavar='DBUSER')
 
-    parser.add_argument('-p', '--password', dest='password', required=True,
+    parser.add_argument('-p', '--password', dest='password',
                         help='Database password', metavar='DBPASS')
 
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    if not args.config:
+        if not all((args.database, args.user, args.password, args.token, args.org,)):
+            print('-c or all of -t, -d, -u, -p, -o arguments must be specified')
+            sys.exit(1)
+
+    return args
+
+
+def parse_config(cli_args: Namespace):
+    """Parse a config file.
+
+    If an option is already in cli_args, ignore the one from config.
+    """
+    config = ConfigParser()
+    config.read(cli_args.config)
+
+    connection_present = False
+    github_present = False
+
+    for section in config.sections():
+
+        if section == 'connection':
+
+            connection_present = True
+
+            if not cli_args.database:
+
+                if config['connection'].get('database'):
+                    cli_args.database = config['connection']['database']
+                else:
+                    print('-d command-line argument or "database" '
+                          'setting in config must be specified')
+                    sys.exit(1)
+
+            if not cli_args.user:
+
+                if config['connection'].get('user'):
+                    cli_args.user = config['connection']['user']
+                else:
+                    print('-u command-line argument or "user" '
+                          'setting in config must be specified')
+                    sys.exit(1)
+
+            if not cli_args.password:
+
+                if config['connection'].get('password'):
+                    cli_args.password = config['connection']['password']
+                else:
+                    print('-p command-line argument or "password" '
+                          'setting in config must be specified')
+                    sys.exit(1)
+
+        elif section == 'github':
+
+            github_present = True
+
+            if not cli_args.token:
+
+                if config['github'].get('token'):
+                    cli_args.token = config['github']['token']
+                else:
+                    print('-t command-line argument or "token" '
+                          'setting in config must be specified')
+                    sys.exit(1)
+
+            if not cli_args.org:
+
+                if config['github'].get('organization'):
+                    cli_args.org = config['github']['organization']
+                else:
+                    print('-o command-line argument or "organization" '
+                          'setting in config must be specified')
+                    sys.exit(1)
+
+    if not all((connection_present, github_present,)):
+        print('both [connection] and [github] sections '
+              'in config file must be specified')
+        sys.exit(1)
+
+    return cli_args
 
 
 def extract_repos(cli_arg: str) -> list:
@@ -161,8 +247,6 @@ def handle_commits(cursor: PgCursor, repo: Repository, branch_name: str, branche
     commits = repo.get_commits(sha=branch_name)
 
     for commit in commits:
-        # print(commit.raw_data['commit']['committer']['name'])
-        # print(commit.raw_data['commit']['committer']['email'])
 
         if commit and commit.author:
             contributor_id = get_contributor_id(cursor, commit.author.login)
@@ -217,6 +301,7 @@ def handle_tags(cursor: PgCursor, repo: Repository):
 def main():
 
     try:
+        # TODO: not sure if it's worth implementing
         #if sys.stdin and len(sys.argv) == 1:
         # We should pass:
         # 1) what to do (like fetch data from GH and update the DB)
@@ -228,6 +313,10 @@ def main():
 
         # Get command-line arguments
         cli_args = get_cli_args()
+
+        # If config is passed, get options from it
+        if cli_args.config:
+            cli_args = parse_config(cli_args)
 
         # Connect to database
         conn, cursor = connect_to_db(database=cli_args.database,

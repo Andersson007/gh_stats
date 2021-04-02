@@ -3,7 +3,11 @@
 
 import sys
 
-from argparse import ArgumentParser
+from argparse import (
+    ArgumentParser,
+    Namespace,
+)
+from configparser import ConfigParser
 
 from psycopg2.extensions import connection
 
@@ -16,17 +20,70 @@ def get_cli_args():
     """Get command-line arguments."""
     parser = ArgumentParser(description='.')
 
+    # Config
+    parser.add_argument('-c', '--config', dest='config',
+                        help='Path to config file', metavar='PATH')
+
     # DB connection related parameters
-    parser.add_argument('-d', '--database', dest='database', required=True,
+    parser.add_argument('-d', '--database', dest='database',
                         help='Database name to connect to', metavar='DBNAME')
 
-    parser.add_argument('-u', '--user', dest='user', required=True,
+    parser.add_argument('-u', '--user', dest='user',
                         help='Database user to log in with', metavar='DBUSER')
 
-    parser.add_argument('-p', '--password', dest='password', required=True,
+    parser.add_argument('-p', '--password', dest='password',
                         help='Database password', metavar='DBPASS')
 
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    if not args.config:
+        if not all((args.database, args.user, args.password)):
+            print('-c or all of -d, -u, -p arguments must be specified')
+            sys.exit(1)
+
+    return args
+
+
+def parse_config(cli_args: Namespace):
+    """Parse a config file.
+
+    If an option is already in cli_args, ignore the one from config.
+    """
+    config = ConfigParser()
+    config.read(cli_args.config)
+
+    for section in config.sections():
+
+        if section == 'connection':
+
+            if not cli_args.database:
+
+                if config['connection'].get('database'):
+                    cli_args.database = config['connection']['database']
+                else:
+                    print('-d command-line argument or "database" '
+                          'setting in config must be specified')
+                    sys.exit(1)
+
+            if not cli_args.user:
+
+                if config['connection'].get('user'):
+                    cli_args.user = config['connection']['user']
+                else:
+                    print('-u command-line argument or "user" '
+                          'setting in config must be specified')
+                    sys.exit(1)
+
+            if not cli_args.password:
+
+                if config['connection'].get('password'):
+                    cli_args.password = config['connection']['password']
+                else:
+                    print('-p command-line argument or "password" '
+                          'setting in config must be specified')
+                    sys.exit(1)
+
+    return cli_args
 
 
 def _exit(conn: connection, rc=0, msg=''):
@@ -34,6 +91,8 @@ def _exit(conn: connection, rc=0, msg=''):
         msg = 'bye'
 
     if rc == 0:
+        conn.close()
+
         if msg is not None:
             print(msg)
 
@@ -99,6 +158,10 @@ def main():
     try:
         # Get command-line arguments
         cli_args = get_cli_args()
+
+        # Get not passed arguments from config
+        if cli_args.config:
+            cli_args = parse_config(cli_args)
 
         # Connect to database
         conn, cursor = connect_to_db(database=cli_args.database,
