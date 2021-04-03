@@ -47,6 +47,10 @@ def get_cli_args():
                         help='Fetch branches only',
                         action='store_true')
 
+    parser.add_argument('-i', '--issues-only', dest='issues_only',
+                        help='Fetch issues only',
+                        action='store_true')
+
     # DB connection related parameters
     parser.add_argument('-d', '--database', dest='database',
                         help='Database name to connect to', metavar='DBNAME')
@@ -346,6 +350,41 @@ def main():
             # If we don't have it now, add repo to DB
             if repo.name not in repos_in_db:
                 add_repo_to_db(cursor, repo.name)
+
+            issues = repo.get_issues()
+            print(issues.totalCount)
+            # TODO:
+            #1. Create a table for issues and PRs
+
+            for issue in issues:
+                print()
+                print('ID:', issue.id)
+                print('NUMBER:', issue.number)
+                print('RAW_DATA["html_url"]:', issue.raw_data['html_url'])
+                print('USER.LOGIN:', issue.user.login)
+                print('USER.NAME:', issue.user.name)
+                print('STATE:', issue.state)
+                print('TITLE:', issue.title)
+                print('BODY:', issue.body)
+                print('CREATED_AT:', issue.created_at)
+                print('UPDATED_AT:', issue.updated_at)
+                print('CLOSED_AT:', issue.closed_at)
+                print('CLOSED_BY:', issue.closed_by)
+                print('COMMENTS:', issue.comments)
+
+                comments = issue.get_comments()
+                for comment in comments:
+                    print('COMMENT.CREATED_AT:', comment.created_at)
+                    print('COMMENT.USER.LOGIN:', comment.user.login)
+                    break
+
+                print('LABELS:', issue.labels)
+                print('LAST_MODIFIED:', issue.last_modified)
+                break
+
+            if cli_args.issues_only:
+                continue
+
 
             # Get branches
             branches = repo.get_branches()
