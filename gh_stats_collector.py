@@ -102,7 +102,6 @@ def main():
 
                 print('LABELS:', issue.labels)
                 print('LAST_MODIFIED:', issue.last_modified)
-                break
 
             if cli_args.issues_only:
                 continue
