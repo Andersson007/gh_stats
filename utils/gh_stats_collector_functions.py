@@ -173,22 +173,7 @@ def get_contributor_id(cursor: PgCursor, login: str) -> int:
     return None
 
 
-def get_branch_id(cursor, branch_name: str, repo_id: int) -> int:
-    """Get a branch ID from the database."""
-    query = 'SELECT id FROM branches WHERE name = %s AND repo_id = %s'
-    res = exec_in_db(cursor, query, (branch_name, repo_id,))
-    if res:
-        return res[0][0]
-    return None
-
-
 def add_contributor_to_db(cursor: PgCursor, login: str, name: str, email: str):
     query = ('INSERT INTO contributors (login, name, email) '
              'VALUES (%s, %s, %s)')
     exec_in_db(cursor, query, (login, name, email), ret_all=False)
-
-
-def add_branch_to_db(cursor: PgCursor, name: str, repo_id: int):
-    query = ('INSERT INTO branches (name, repo_id) '
-             'VALUES (%s, %s)')
-    exec_in_db(cursor, query, (name, repo_id), ret_all=False)

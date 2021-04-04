@@ -73,7 +73,6 @@ class TagHandler(Handler):
         """Get a tag ID from the database."""
         query = ('SELECT id FROM tags WHERE repo_id = %s AND name = %s')
         res = self.exec_in_db(self.cursor, query, (self.repo_id, tag_name))
-
         if res:
             return res[0][0]
         return None
