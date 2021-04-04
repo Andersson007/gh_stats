@@ -163,17 +163,3 @@ def get_repo_id(cursor: PgCursor, repo_name: str) -> int:
     if res:
         return res[0][0]
     return None
-
-
-def get_contributor_id(cursor: PgCursor, login: str) -> int:
-    """Get a contributor ID from the database."""
-    res = exec_in_db(cursor, 'SELECT id FROM contributors WHERE login = %s', (login,))
-    if res:
-        return res[0][0]
-    return None
-
-
-def add_contributor_to_db(cursor: PgCursor, login: str, name: str, email: str):
-    query = ('INSERT INTO contributors (login, name, email) '
-             'VALUES (%s, %s, %s)')
-    exec_in_db(cursor, query, (login, name, email), ret_all=False)

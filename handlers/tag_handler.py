@@ -19,7 +19,7 @@ class TagHandler(Handler):
         self.repo = None
         self.repo_id = 0
         self.tags = None
-        self.commit_handler = CommitHandler(cursor)
+        self.commit = CommitHandler(cursor)
 
     def handle(self, repo: Repository):
         if not self.__init_attrs(repo):
@@ -36,7 +36,7 @@ class TagHandler(Handler):
             if tag_id is None:
                 #TODO: replace get_repo_id with a proper
                 # clasee later
-                commit_id = self.commit_handler.get_id(tag.commit.sha)
+                commit_id = self.commit.get_id(tag.commit.sha)
 
                 if commit_id is None:
                     pass
