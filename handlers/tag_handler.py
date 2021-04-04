@@ -7,9 +7,9 @@ from psycopg2.extensions import cursor as PgCursor
 from .abc_handler import Handler
 
 from .commit_handler import CommitHandler
+from .repo_handler import RepoHandler
 
 from utils.connection import exec_in_db
-from utils.gh_stats_collector_functions import get_repo_id
 
 
 class TagHandler(Handler):
@@ -20,6 +20,7 @@ class TagHandler(Handler):
         self.repo_id = 0
         self.tags = None
         self.commit = CommitHandler(cursor)
+        self.repo_handler = RepoHandler(cursor)
 
     def handle(self, repo: Repository):
         if not self.__init_attrs(repo):
@@ -34,8 +35,6 @@ class TagHandler(Handler):
             tag_id = self.get_id(tag.name)
 
             if tag_id is None:
-                #TODO: replace get_repo_id with a proper
-                # clasee later
                 commit_id = self.commit.get_id(tag.commit.sha)
 
                 if commit_id is None:
@@ -57,9 +56,7 @@ class TagHandler(Handler):
             # If there are no tags
             return False
 
-        #TODO: replace get_repo_id with a proper
-        # clasee later
-        self.repo_id = get_repo_id(self.cursor, self.repo.name)
+        self.repo_id = self.repo_handler.get_id(self.repo.name)
 
         return True
 

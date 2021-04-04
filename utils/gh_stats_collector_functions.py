@@ -140,26 +140,3 @@ def parse_config(cli_args: Namespace):
 def extract_repos(cli_arg: str) -> list:
     """Make a list from a passed-via-cli string."""
     return [repo.strip() for repo in cli_arg.split(',')]
-
-
-def get_repos_from_db(cursor: PgCursor) -> list:
-    """Get a repo list from the database."""
-    res = exec_in_db(cursor, 'SELECT name FROM repos')
-
-    if res:
-        return [elem[0] for elem in res]
-    return []
-
-
-def add_repo_to_db(cursor: PgCursor, repo_name: str):
-    """Add a repo to our database."""
-    exec_in_db(cursor, 'INSERT INTO repos (name) VALUES (%s)', (repo_name,),
-               ret_all=False)
-
-
-def get_repo_id(cursor: PgCursor, repo_name: str) -> int:
-    """Get a repo ID from the database."""
-    res = exec_in_db(cursor, 'SELECT id FROM repos WHERE name = %s', (repo_name,))
-    if res:
-        return res[0][0]
-    return None

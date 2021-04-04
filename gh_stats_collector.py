@@ -7,14 +7,13 @@ from github import Github
 
 from handlers.tag_handler import TagHandler
 from handlers.commit_handler import CommitHandler
+from handlers.repo_handler import RepoHandler
 
 from utils.connection import connect_to_db
 
 from utils.gh_stats_collector_functions import (
-    add_repo_to_db,
     extract_repos,
     get_cli_args,
-    get_repos_from_db,
     parse_config,
 )
 
@@ -45,7 +44,9 @@ def main():
                                      password=cli_args.password,
                                      autocommit=True)
 
-        repos_in_db = get_repos_from_db(cursor)
+        repo_handler = RepoHandler(cursor)
+
+        repos_in_db = repo_handler.get_repo_list()
 
         # Create github object and set access token
         gh = Github(cli_args.token)
@@ -70,7 +71,7 @@ def main():
 
             # If we don't have it now, add repo to DB
             if repo.name not in repos_in_db:
-                add_repo_to_db(cursor, repo.name)
+                repo_handler.add(repo.name)
 
             issues = repo.get_issues()
             print(issues.totalCount)

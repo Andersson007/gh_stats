@@ -7,9 +7,9 @@ from psycopg2.extensions import cursor as PgCursor
 from .abc_handler import Handler
 from .branch_handler import BranchHandler
 from .contributor_handler import ContributorHandler
+from .repo_handler import RepoHandler
 
 from utils.connection import exec_in_db
-from utils.gh_stats_collector_functions import get_repo_id
 
 
 class CommitHandler(Handler):
@@ -18,6 +18,7 @@ class CommitHandler(Handler):
         self.exec_in_db = exec_in_db
         self.branch = BranchHandler(cursor)
         self.contributor = ContributorHandler(cursor)
+        self.repo = RepoHandler(cursor)
 
     def get_id(self, sha: str) -> int:
         """Get a commit ID from the database."""
@@ -37,8 +38,7 @@ class CommitHandler(Handler):
         self.exec_in_db(self.cursor, query, args, ret_all=False)
 
     def handle(self, repo: Repository, branch_name: str, branches_only=False):
-        # TODO: change functions to objects
-        repo_id = get_repo_id(self.cursor, repo.name)
+        repo_id = self.repo.get_id(repo.name)
 
         branch_id = self.branch.get_id(branch_name, repo_id)
         if branch_id is None:
