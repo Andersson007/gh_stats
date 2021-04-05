@@ -5,8 +5,9 @@ import sys
 
 from github import Github
 
-from handlers.tag_handler import TagHandler
+from handlers.issue_handler import IssueHandler
 from handlers.commit_handler import CommitHandler
+from handlers.tag_handler import TagHandler
 from handlers.repo_handler import RepoHandler
 
 from utils.connection import connect_to_db
@@ -62,6 +63,7 @@ def main():
         # Init handlers
         tag_handler = TagHandler(cursor)
         commit_handler = CommitHandler(cursor)
+        issue_handler = IssueHandler(cursor)
 
         # Get repos from GH and do main job
         for repo in gh_org.get_repos():
@@ -73,43 +75,17 @@ def main():
             if repo.name not in repos_in_db:
                 repo_handler.add(repo.name)
 
-            issues = repo.get_issues()
-            print(issues.totalCount)
+            # Handle issues
+            issue_handler.handle(repo)
             # TODO:
             # 1. [DONE] Create a table for issues and PRs
             # 2. Create IssueHandler class
             # 3. Initialize it
             # 4. In the loop below, issue.add(issue) or issue_handler.handle(issues)
-
-            for issue in issues:
-                #print()
-                #print('ID:', issue.id)
-                # CREATE TABLE issues (id BIGSERIAL PRIMARY KEY, is_issue BOOLEAN, state TEXT,
-                # author_id BIGINT, title TEXT, ts_created TIMESTAMP, ts_updated TIMESTAMP,
-                # closed_ts TIMESTAMP, closed_by_id BIGINT, comments BIGINT;
-                #ALTER TABLE issues ADD CONSTRAINT fk_contributor_id FOREIGN KEY (author_id) REFERENCES contributors (id);
-
-                #print('NUMBER:', issue.number)
-                #print('RAW_DATA["html_url"]:', issue.raw_data['html_url'])
-                #print('USER.LOGIN:', issue.user.login)
-                #print('USER.NAME:', issue.user.name)
-                #print('STATE:', issue.state)
-                #print('TITLE:', issue.title)
-                #print('BODY:', issue.body)
-                #print('CREATED_AT:', issue.created_at)
-                #print('UPDATED_AT:', issue.updated_at)
-                #print('CLOSED_AT:', issue.closed_at)
-                #print('CLOSED_BY:', issue.closed_by)
-                #print('COMMENTS:', issue.comments)
-
-                comments = issue.get_comments()
-                for comment in comments:
-                    print('COMMENT.CREATED_AT:', comment.created_at)
-                    print('COMMENT.USER.LOGIN:', comment.user.login)
-                    break
-
-                print('LABELS:', issue.labels)
-                print('LAST_MODIFIED:', issue.last_modified)
+            # 4.1. If the issue already exists, update it if needed
+            # 5. Create table for comments
+            # 6. Write CommentHandler class
+            # 7. Put comments into the table referencing to issues table via a foreign key
 
             if cli_args.issues_only:
                 continue

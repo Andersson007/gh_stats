@@ -28,8 +28,9 @@ ALTER TABLE tags ADD CONSTRAINT fk_repo_id FOREIGN KEY (repo_id) REFERENCES repo
 ALTER TABLE tags ADD CONSTRAINT fk_commit_id FOREIGN KEY (commit_id) REFERENCES commits (id);
 
 -- Create a table to store issues and pull requests
-CREATE TABLE issues (id BIGSERIAL PRIMARY KEY, is_issue BOOLEAN, state TEXT, author_id BIGINT, title TEXT, ts_created TIMESTAMP, ts_updated TIMESTAMP, closed_ts TIMESTAMP, closed_by_id BIGINT, comments BIGINT);
+CREATE TABLE issues (id BIGINT PRIMARY KEY, repo_id INT, number INT, is_issue BOOLEAN, state TEXT, author_id BIGINT, title TEXT, ts_created TIMESTAMP, ts_updated TIMESTAMP, ts_closed TIMESTAMP, comment_cnt BIGINT);
 ALTER TABLE issues ADD CONSTRAINT fk_contributor_id FOREIGN KEY (author_id) REFERENCES contributors (id);
+ALTER TABLE issues ADD CONSTRAINT fk_repo_id FOREIGN KEY (repo_id) REFERENCES repos (id);
 
 -- SELECT * FROM repos LIMIT 5;
 
@@ -60,3 +61,5 @@ ALTER TABLE issues ADD CONSTRAINT fk_contributor_id FOREIGN KEY (author_id) REFE
 -- SELECT r.name FROM repos AS r WHERE r.id in (SELECT b.repo_id FROM branches AS b GROUP BY b.repo_id HAVING count(b.repo_id) > 1) ORDER BY r.name;
 
 -- SELECT DISTINCT r.name, ARRAY(SELECT b.name FROM branches b JOIN repos re ON re.id = b.repo_id WHERE re.name = r.name) FROM branches AS b LEFT JOIN repos AS r ON r.id = b.repo_id GROUP BY b.name, r.name ORDER BY r.name;
+
+-- SELECT i.is_issue, i.number, i.state, i.comment_cnt AS "comment num", c.login AS AUTHOR, i.ts_created, i.ts_updated, i.ts_closed FROM issues AS i LEFT JOIN contributors AS c ON c.id = i.author_id;
