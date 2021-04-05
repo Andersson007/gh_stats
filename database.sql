@@ -27,6 +27,10 @@ CREATE TABLE IF NOT EXISTS tags (id SERIAL PRIMARY KEY, name TEXT, repo_id INT, 
 ALTER TABLE tags ADD CONSTRAINT fk_repo_id FOREIGN KEY (repo_id) REFERENCES repos (id);
 ALTER TABLE tags ADD CONSTRAINT fk_commit_id FOREIGN KEY (commit_id) REFERENCES commits (id);
 
+-- Create a table to store issues and pull requests
+CREATE TABLE issues (id BIGSERIAL PRIMARY KEY, is_issue BOOLEAN, state TEXT, author_id BIGINT, title TEXT, ts_created TIMESTAMP, ts_updated TIMESTAMP, closed_ts TIMESTAMP, closed_by_id BIGINT, comments BIGINT);
+ALTER TABLE issues ADD CONSTRAINT fk_contributor_id FOREIGN KEY (author_id) REFERENCES contributors (id);
+
 -- SELECT * FROM repos LIMIT 5;
 
 -- SELECT * FROM tags LIMIT 5;

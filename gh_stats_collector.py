@@ -76,23 +76,31 @@ def main():
             issues = repo.get_issues()
             print(issues.totalCount)
             # TODO:
-            #1. Create a table for issues and PRs
+            # 1. [DONE] Create a table for issues and PRs
+            # 2. Create IssueHandler class
+            # 3. Initialize it
+            # 4. In the loop below, issue.add(issue) or issue_handler.handle(issues)
 
             for issue in issues:
-                print()
-                print('ID:', issue.id)
-                print('NUMBER:', issue.number)
-                print('RAW_DATA["html_url"]:', issue.raw_data['html_url'])
-                print('USER.LOGIN:', issue.user.login)
-                print('USER.NAME:', issue.user.name)
-                print('STATE:', issue.state)
-                print('TITLE:', issue.title)
-                print('BODY:', issue.body)
-                print('CREATED_AT:', issue.created_at)
-                print('UPDATED_AT:', issue.updated_at)
-                print('CLOSED_AT:', issue.closed_at)
-                print('CLOSED_BY:', issue.closed_by)
-                print('COMMENTS:', issue.comments)
+                #print()
+                #print('ID:', issue.id)
+                # CREATE TABLE issues (id BIGSERIAL PRIMARY KEY, is_issue BOOLEAN, state TEXT,
+                # author_id BIGINT, title TEXT, ts_created TIMESTAMP, ts_updated TIMESTAMP,
+                # closed_ts TIMESTAMP, closed_by_id BIGINT, comments BIGINT;
+                #ALTER TABLE issues ADD CONSTRAINT fk_contributor_id FOREIGN KEY (author_id) REFERENCES contributors (id);
+
+                #print('NUMBER:', issue.number)
+                #print('RAW_DATA["html_url"]:', issue.raw_data['html_url'])
+                #print('USER.LOGIN:', issue.user.login)
+                #print('USER.NAME:', issue.user.name)
+                #print('STATE:', issue.state)
+                #print('TITLE:', issue.title)
+                #print('BODY:', issue.body)
+                #print('CREATED_AT:', issue.created_at)
+                #print('UPDATED_AT:', issue.updated_at)
+                #print('CLOSED_AT:', issue.closed_at)
+                #print('CLOSED_BY:', issue.closed_by)
+                #print('COMMENTS:', issue.comments)
 
                 comments = issue.get_comments()
                 for comment in comments:
