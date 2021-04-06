@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from github import Repository
+from github.Issue import Issue
 
 from psycopg2.extensions import cursor as PgCursor
 
@@ -44,7 +45,24 @@ class IssueHandler(Handler):
         # 1. Get columns that can be updated (in a dict form)
         # 2. Compater
         # 3. Update fields which needed
-        pass
+        cur_vals = self.__issue_get_mutable_cols(issue)
+
+        cur_vals_set = set(list(cur_vals.values()))
+
+        new_vals_set = set([issue.state, issue.title, issue.updated_at,
+                           issue.closed_at, issue.comments])
+
+        if cur_vals_set != new_vals_set:
+            print(cur_vals_set)
+            print(new_vals_set)
+
+
+    def __issue_get_mutable_cols(self, issue: Issue):
+        query = ('SELECT state, title, ts_updated, ts_closed, comment_cnt '
+                 'FROM issues WHERE id = %s')
+        res = self.exec_in_db(self.cursor, query, (issue.id,))
+        res = [dict(row) for row in res]
+        return res[0]
 
     def handle(self, repo: Repository):
 

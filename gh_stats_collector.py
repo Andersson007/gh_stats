@@ -79,9 +79,9 @@ def main():
             issue_handler.handle(repo)
             # TODO:
             # 1. [DONE] Create a table for issues and PRs
-            # 2. Create IssueHandler class
-            # 3. Initialize it
-            # 4. In the loop below, issue.add(issue) or issue_handler.handle(issues)
+            # 2. [DONE] Create IssueHandler class
+            # 3. [DONE] Initialize it
+            # 4. [DONE] In the loop below, issue.add(issue) or issue_handler.handle(issues)
             # 4.1. If the issue already exists, update it if needed
             # 5. Create table for comments
             # 6. Write CommentHandler class
