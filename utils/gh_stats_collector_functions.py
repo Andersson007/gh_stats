@@ -34,6 +34,11 @@ def get_cli_args():
                         help='GitHub repository name or comma-separated list of names',
                         metavar='REPO_NAME')
 
+    # Update the repo list only in DB
+    parser.add_argument('--repos-only', dest='repos_only',
+                        help='Fetch and update repo list only',
+                        action='store_true')
+
     # Get data from a certain repo / repos
     parser.add_argument('-b', '--branches-only', dest='branches_only',
                         help='Fetch branches only',

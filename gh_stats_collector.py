@@ -65,8 +65,10 @@ def main():
         commit_handler = CommitHandler(cursor)
         issue_handler = IssueHandler(cursor)
 
+        repos = gh_org.get_repos()
+
         # Get repos from GH and do main job
-        for repo in gh_org.get_repos():
+        for repo in repos:
             # Skip what we don't need
             if repos_needed and repo.name not in repos_needed:
                 continue
@@ -74,6 +76,9 @@ def main():
             # If we don't have it now, add repo to DB
             if repo.name not in repos_in_db:
                 repo_handler.add(repo.name)
+
+            if cli_args.repos_only:
+                continue
 
             # Handle issues
             issue_handler.handle(repo)

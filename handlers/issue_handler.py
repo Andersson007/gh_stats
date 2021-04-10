@@ -49,12 +49,17 @@ class IssueHandler(Handler):
 
         cur_vals_set = set(list(cur_vals.values()))
 
-        new_vals_set = set([issue.state, issue.title, issue.updated_at,
-                           issue.closed_at, issue.comments])
+        args = [issue.state, issue.title, issue.updated_at,
+                issue.closed_at, issue.comments]
+
+        new_vals_set = set(args)
 
         if cur_vals_set != new_vals_set:
-            print(cur_vals_set)
-            print(new_vals_set)
+            query = ('UPDATE issues SET state = %s, title = %s, '
+                     'ts_updated = %s, ts_closed = %s, comment_cnt = %s '
+                     'WHERE id = %s')
+            args.append(issue.id)
+            self.exec_in_db(self.cursor, query, args, ret_all=False)
 
 
     def __issue_get_mutable_cols(self, issue: Issue):
