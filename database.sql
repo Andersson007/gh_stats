@@ -32,6 +32,12 @@ CREATE TABLE issues (id BIGINT PRIMARY KEY, repo_id INT, number INT, is_issue BO
 ALTER TABLE issues ADD CONSTRAINT fk_contributor_id FOREIGN KEY (author_id) REFERENCES contributors (id);
 ALTER TABLE issues ADD CONSTRAINT fk_repo_id FOREIGN KEY (repo_id) REFERENCES repos (id);
 
+-- Create a table to store comments
+CREATE TABLE comments (id BIGINT PRIMARY KEY, repo_id BIGINT, issue_id BIGINT, author_id BIGINT, ts_created TIMESTAMP);
+ALTER TABLE comments ADD CONSTRAINT fk_contributor_id FOREIGN KEY (author_id) REFERENCES contributors (id);
+ALTER TABLE comments ADD CONSTRAINT fk_repo_id FOREIGN KEY (repo_id) REFERENCES repos (id);
+ALTER TABLE comments ADD CONSTRAINT fk_issue_id FOREIGN KEY (issue_id) REFERENCES issues (id);
+
 -- SELECT * FROM repos LIMIT 5;
 
 -- SELECT * FROM tags LIMIT 5;
@@ -63,3 +69,7 @@ ALTER TABLE issues ADD CONSTRAINT fk_repo_id FOREIGN KEY (repo_id) REFERENCES re
 -- SELECT DISTINCT r.name, ARRAY(SELECT b.name FROM branches b JOIN repos re ON re.id = b.repo_id WHERE re.name = r.name) FROM branches AS b LEFT JOIN repos AS r ON r.id = b.repo_id GROUP BY b.name, r.name ORDER BY r.name;
 
 -- SELECT i.is_issue, i.number, i.state, i.comment_cnt AS "comment num", c.login AS AUTHOR, i.ts_created, i.ts_updated, i.ts_closed FROM issues AS i LEFT JOIN contributors AS c ON c.id = i.author_id;
+
+-- SELECT a.login AS "author", count(c.id) AS "comment num" FROM contributors AS a JOIN comments AS c ON a.id = c.author_id JOIN repos AS r ON c.repo_id = r.id GROUP BY "author", r.name HAVING r.name = 'community.mysql' ORDER BY "comment num" DESC LIMIT 10;
+
+-- SELECT i.is_issue, i.number, i.state, i.comment_cnt AS "comment num", max(cm.ts_created) AS "latest comment", c.login AS AUTHOR, i.ts_created, i.ts_updated FROM issues AS i LEFT JOIN contributors AS c ON c.id = i.author_id LEFT JOIN repos AS r ON r.id = i.repo_id LEFT JOIN comments AS cm ON cm.issue_id = i.id GROUP BY i.is_issue, i.number, i.state, i.comment_cnt, c.login, i.ts_created, i.ts_updated, r.name HAVING r.name = 'community.mysql' AND i.state != 'closed' ORDER BY "comment num" DESC;

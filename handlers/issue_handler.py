@@ -6,6 +6,7 @@ from github.Issue import Issue
 from psycopg2.extensions import cursor as PgCursor
 
 from .abc_handler import Handler
+from .comment_handler import CommentHandler
 from .contributor_handler import ContributorHandler
 from .repo_handler import RepoHandler
 
@@ -19,6 +20,7 @@ class IssueHandler(Handler):
         self.contributor = ContributorHandler(cursor)
         self.repo = RepoHandler(cursor)
         self.contributor = ContributorHandler(cursor)
+        self.comments = CommentHandler(cursor)
 
     def get_id(self, issue_id: int) -> int:
         """Get an issue ID from the database."""
@@ -41,10 +43,7 @@ class IssueHandler(Handler):
         self.exec_in_db(self.cursor, query, args, ret_all=False)
 
     def update(self, issue):
-        #TODO: complete
-        # 1. Get columns that can be updated (in a dict form)
-        # 2. Compater
-        # 3. Update fields which needed
+        """Update an issue if needed."""
         cur_vals = self.__issue_get_mutable_cols(issue)
 
         cur_vals_set = set(list(cur_vals.values()))
@@ -60,7 +59,6 @@ class IssueHandler(Handler):
                      'WHERE id = %s')
             args.append(issue.id)
             self.exec_in_db(self.cursor, query, args, ret_all=False)
-
 
     def __issue_get_mutable_cols(self, issue: Issue):
         query = ('SELECT state, title, ts_updated, ts_closed, comment_cnt '
@@ -100,3 +98,5 @@ class IssueHandler(Handler):
                 self.add(issue.id, repo_id, issue.number, is_issue, issue.state,
                          author_id, issue.title, issue.created_at, issue.updated_at,
                          issue.closed_at, issue.comments)
+
+            self.comments.handle(repo_id, issue.id, issue.get_comments())

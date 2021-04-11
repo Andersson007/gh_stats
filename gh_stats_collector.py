@@ -87,7 +87,7 @@ def main():
             # 2. [DONE] Create IssueHandler class
             # 3. [DONE] Initialize it
             # 4. [DONE] In the loop below, issue.add(issue) or issue_handler.handle(issues)
-            # 4.1. If the issue already exists, update it if needed
+            # 4.1. [DONE] If the issue already exists, update it if needed
             # 5. Create table for comments
             # 6. Write CommentHandler class
             # 7. Put comments into the table referencing to issues table via a foreign key
