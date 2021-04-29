@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>My test page</title>
+  </head>
+  <body>
+    {% if repo_list %}
+    <table>
+      <tr>
+        <th>Repo name</th>
+      </tr>
+      {% for item in repo_list %}
+        <tr> 
+            <td>{{ item }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+    <p>
+      <b>Total: {{ repo_num }}</b>
+    </p>
+  {% else %}
+    <p>No repositories are available.</p>
+  {% endif %}
+  </body>
+</html>
