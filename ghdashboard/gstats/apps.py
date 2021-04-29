@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class GhstatsConfig(AppConfig):
+class GstatsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'ghstats'
+    name = 'gstats'
