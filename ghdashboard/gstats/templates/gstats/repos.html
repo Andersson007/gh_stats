@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <title>Repo list</title>
+  </head>
+
+  <body>
+    <a href="{% url 'index' %}">Homepage</a>
+
+    <p>Total: {{ repo_num }}</p>
+
+    {% if repo_list %}
+    <table>
+      {% for item in repo_list %}
+        <tr> 
+            <td><a href="https://github.com/ansible-collections/{{ item }}" target="_blank" >{{ item }}</a></td>
+        </tr>
+      {% endfor %}
+    </table>
+    {% else %}
+      <p>No repositories are available.</p>
+    {% endif %}
+  </body>
+</html>
