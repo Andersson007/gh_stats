@@ -50,6 +50,17 @@ class GStatCli():
             print('[%s] %s' % (cnt, branch[0]))
             cnt += 1
 
+    def print_all_repo_branches(self):
+        repo_branches = []
+        for repo in self.repo_set:
+            branches = [row[0] for row in self.ghstat_db.get_branches(repo)]
+            repo_branches.append((repo, branches))
+
+        repo_branches.sort()
+
+        for elem in repo_branches:
+            print(elem[0], elem[1])
+
     def show_global_release_stats(self, months_ago=0):
         result = self.ghstat_db.get_global_release_stats(months_ago)
 

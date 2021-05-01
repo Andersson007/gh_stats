@@ -24,11 +24,14 @@ class GhStatDb():
         res = self.exec_in_db(self.cursor, 'SELECT name FROM repos')
         return [r[0] for r in res]
 
-    def get_branches(self):
+    def get_branches(self, repo=None):
+        if repo is None:
+            repo = self.repo
+
         query = ('SELECT b.name FROM branches AS b '
                  'LEFT JOIN repos AS r ON r.id = b.repo_id '
                  'WHERE r.name = %s ORDER BY b.name')
-        return self.exec_in_db(self.cursor, query, (self.repo,))
+        return self.exec_in_db(self.cursor, query, (repo,))
 
     def get_repo_release_stats(self) -> list:
         query = ('SELECT t.name AS "Release Version", c.ts AS "Release Date", '

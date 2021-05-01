@@ -148,7 +148,7 @@ class InputHandler():
             if self.gcli.current_repo != 'root':
                 self.gcli.print_branches()
             else:
-                print('repo is not set, run "use repo.name" to choose')
+                self.gcli.print_all_repo_branches()
 
         elif user_input != '':
             print('unrecognized command')
