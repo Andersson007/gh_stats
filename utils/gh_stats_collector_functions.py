@@ -58,6 +58,11 @@ def get_cli_args():
     parser.add_argument('-p', '--password', dest='password',
                         help='Database password', metavar='DBPASS')
 
+    # Other parameters
+    parser.add_argument('--pause', dest='pause',
+                        help='Pause between requests to GitHub API in seconds',
+                        metavar='SEC')
+
     args = parser.parse_args()
 
     if not args.config:

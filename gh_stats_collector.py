@@ -3,6 +3,8 @@
 
 import sys
 
+from time import sleep
+
 from github import Github
 
 from handlers.issue_handler import IssueHandler
@@ -22,16 +24,6 @@ from utils.gh_stats_collector_functions import (
 def main():
 
     try:
-        # TODO: not sure if it's worth implementing
-        #if sys.stdin and len(sys.argv) == 1:
-        # We should pass:
-        # 1) what to do (like fetch data from GH and update the DB)
-        # 2) with what (e.g. with a collection)
-        # 3) connection params
-        # if everything is correct
-        # 4) set up a flag not to use get_cli_args()
-        # but define it here
-
         # Get command-line arguments
         cli_args = get_cli_args()
 
@@ -98,6 +90,9 @@ def main():
 
             # Handle tags
             tag_handler.handle(repo)
+
+            if cli_args.pause:
+                sleep(cli_args.pause)
 
     except KeyboardInterrupt:
         print(' Interrupted')
