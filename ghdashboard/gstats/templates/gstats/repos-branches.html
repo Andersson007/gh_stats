@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <title>Branches</title>
+
+    <style>
+      table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+        text-align: left;
+        line-height: 12px;
+      }
+    </style>
+
+  </head>
+
+  <body>
+    <a href="{% url 'index' %}">Homepage</a>
+    <a href="{% url 'repos' %}">Raw repo list</a>
+
+    <p>Total: {{ repo_num }}</p>
+
+    {% if repos_and_branches %}
+    <table>
+
+      <th>Repo name</th><th>Branches</th>
+
+      {% for item in repos_and_branches %}
+        <tr> 
+            <td><a href="https://github.com/ansible-collections/{{ item.0 }}" target="_blank" >{{ item.0 }}</a></td>
+
+            {% if item.1 %}
+
+                <td>
+                {% for branch in item.1 %}
+                    {{ branch }}<br></br>
+                {% endfor %}
+                </td>
+
+            {% else %}
+              <td></td>
+            {% endif %}
+
+        </tr>
+      {% endfor %}
+
+    </table>
+    {% else %}
+      <p>No repositories are available.</p>
+    {% endif %}
+  </body>
+</html>
