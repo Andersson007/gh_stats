@@ -1,3 +1,5 @@
+from operator import itemgetter
+
 from django.shortcuts import render
 
 from .models import Repos, Branches
@@ -44,3 +46,42 @@ def repos_and_branches(request):
     }
 
     return render(request, 'gstats/repos-branches.html', context)
+
+
+def latest_releases(request):
+    """Global releases info: latest release, latest commit."""
+    query = ('SELECT r.id, r.name, max(c.ts) AS latest_tag '
+             'FROM tags AS t LEFT JOIN commits AS c ON c.id = t.commit_id '
+             'LEFT JOIN repos AS r ON r.id = t.repo_id '
+             'GROUP BY r.id, r.name')
+
+    repos = Repos.objects.raw(query)
+
+    tmp_dict = {}
+
+    for repo in repos:
+        tmp_dict[repo.name] = {}
+        tmp_dict[repo.name]['tag'] = repo.latest_tag
+
+    query = ('SELECT r.id, r.name, max(c.ts) AS latest_commit '
+             'FROM commits AS c LEFT JOIN repos AS r ON r.id = c.repo_id '
+             'GROUP BY r.id, r.name')
+
+    repos = Repos.objects.raw(query)
+
+    for repo in repos:
+        if repo.name not in tmp_dict:
+            continue
+        tmp_dict[repo.name]['commit'] = repo.latest_commit
+
+    repo_tag_commit = []
+    for key, val in tmp_dict.items():
+        repo_tag_commit.append([key, [val['tag'], val['commit']]])
+
+    repo_tag_commit.sort(key=itemgetter(1), reverse=True)
+
+    context = {
+        'latest_releases': repo_tag_commit,
+    }
+
+    return render(request, 'gstats/latest-releases.html', context)

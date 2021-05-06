@@ -76,7 +76,6 @@ class GhStatDb():
         res = self.exec_in_db(self.cursor, query)
 
         for row in res:
-            print(row)
             if row[0] not in final_result:
                 continue
 

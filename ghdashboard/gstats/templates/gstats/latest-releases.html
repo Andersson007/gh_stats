@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <title>Releases</title>
+
+    <style>
+      table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+        text-align: left;
+        line-height: 20px;
+      }
+    </style>
+
+  </head>
+
+  <body>
+    <a href="{% url 'index' %}">Homepage</a>
+    <p></p>
+    {% if latest_releases %}
+    <table>
+
+      <th>Repo name</th><th>Latest release</th><th>Latest commit</th>
+
+      {% for item in latest_releases %}
+        <tr> 
+            <td><a href="https://github.com/ansible-collections/{{ item.0 }}" target="_blank" >{{ item.0 }}</a></td>
+            <td>{{ item.1.0|date:'Y-m-d' }}</td>
+            <td>{{ item.1.1|date:'Y-m-d' }}</td>
+        </tr>
+      {% endfor %}
+
+    </table>
+    {% else %}
+      <p>No information available.</p>
+    {% endif %}
+  </body>
+</html>
