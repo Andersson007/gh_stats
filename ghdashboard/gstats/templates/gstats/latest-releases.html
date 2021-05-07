@@ -22,13 +22,14 @@
     {% if latest_releases %}
     <table>
 
-      <th>Repo name</th><th>Latest release</th><th>Latest commit</th>
+      <th>Repo name</th><th>Latest release</th><th>Latest commit</th><th>Ref</th>
 
       {% for item in latest_releases %}
         <tr> 
-            <td><a href="https://github.com/ansible-collections/{{ item.0 }}" target="_blank" >{{ item.0 }}</a></td>
+            <td><a href="{% url 'repo-display' item.0 %}" target="_blank" >{{ item.0 }}</a></td>
             <td>{{ item.1.0|date:'Y-m-d' }}</td>
             <td>{{ item.1.1|date:'Y-m-d' }}</td>
+            <td><a href="https://github.com/ansible-collections/{{ item.0 }}" target="_blank" >repo</a></td>
         </tr>
       {% endfor %}
 

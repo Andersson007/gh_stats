@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <title>Repo display</title>
+
+    <style>
+      table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+        text-align: left;
+        line-height: 20px;
+        table-layout: auto;
+      }
+    </style>
+
+  </head>
+  <body>
+    <a href="{% url 'index' %}">Homepage</a>
+    <a href="{% url 'repos' %}">Repo list</a>
+    <a href="{% url 'repos-branches' %}">Branches</a>
+    <a href="{% url 'latest-releases' %}">Latest releases</a>
+
+    <p><b>{{ repo_name }}</b></p>
+
+    {% if tag_list %}
+    <table>
+
+      <th>Release version</th><th>Date</th><th>Author</th><th>Elapsed</th>
+
+      {% for item in tag_list %}
+        <tr> 
+            <td>{{ item.0 }}</td>
+            <td>{{ item.1|date:'Y-m-d' }}</td>
+            <td>{{ item.2 }}</td>
+            <td>{{ item.3 }}</td>
+        </tr>
+      {% endfor %}
+
+    </table>
+    {% else %}
+      <p>No information available.</p>
+    {% endif %}
+  </body>
+</html>

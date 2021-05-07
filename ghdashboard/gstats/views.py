@@ -85,3 +85,27 @@ def latest_releases(request):
     }
 
     return render(request, 'gstats/latest-releases.html', context)
+
+
+def repo_display(request, repo_name):
+    query = ('SELECT t.id, t.name, c.ts, '
+             'a.login AS "author", age(c.ts) AS "time_elapsed" '
+             'FROM tags AS t LEFT JOIN commits AS c ON c.id = t.commit_id '
+             'LEFT JOIN contributors AS a ON a.id = c.author_id '
+             'LEFT JOIN repos AS r ON r.id = t.repo_id '
+             'WHERE r.name = %s')
+
+    tags = Repos.objects.raw(query, (repo_name,))
+
+    ret_list = []
+    for tag in tags:
+        ret_list.append([tag.name, tag.ts, tag.author, tag.time_elapsed])
+
+    ret_list.sort(reverse=True)
+
+    context = {
+        'repo_name': repo_name,
+        'tag_list': ret_list,
+    }
+
+    return render(request, 'gstats/repo-display.html', context)
