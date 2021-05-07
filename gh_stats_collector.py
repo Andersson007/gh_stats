@@ -92,7 +92,7 @@ def main():
             tag_handler.handle(repo)
 
             if cli_args.pause:
-                sleep(cli_args.pause)
+                sleep(int(cli_args.pause))
 
     except KeyboardInterrupt:
         print(' Interrupted')
