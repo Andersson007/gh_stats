@@ -42,5 +42,25 @@
     {% else %}
       <p>No information available.</p>
     {% endif %}
+
+    <p></p>
+
+    {% if branches %}
+    <table>
+
+      <th>Branches</th>
+
+      {% for branch in branches %}
+        <tr> 
+            <td>{{ branch.name }}</td>
+        </tr>
+      {% endfor %}
+
+    </table>
+    {% else %}
+      <p>No information available.</p>
+    {% endif %}
+
+
   </body>
 </html>

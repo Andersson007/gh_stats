@@ -88,6 +88,8 @@ def latest_releases(request):
 
 
 def repo_display(request, repo_name):
+    # TODO: move out to a separate function
+    # Get release info
     query = ('SELECT t.id, t.name, c.ts, '
              'a.login AS "author", age(c.ts) AS "time_elapsed" '
              'FROM tags AS t LEFT JOIN commits AS c ON c.id = t.commit_id '
@@ -101,9 +103,20 @@ def repo_display(request, repo_name):
     for tag in tags:
         ret_list.append([tag.name, tag.ts, tag.author, tag.time_elapsed])
 
+    # TODO: sort it in the SQL query
     ret_list.sort(reverse=True)
 
+    # TODO: move out to a separate function
+    # TODO: maybe the latest commit time?
+    # Get branch info
+    query = ('SELECT b.id, b.name FROM branches AS b '
+             'LEFT JOIN repos AS r ON r.id = b.repo_id '
+             'WHERE r.name = %s ORDER BY b.name')
+
+    branches = Branches.objects.raw(query, (repo_name,))
+
     context = {
+        'branches': branches,
         'repo_name': repo_name,
         'tag_list': ret_list,
     }

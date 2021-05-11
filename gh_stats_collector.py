@@ -7,10 +7,11 @@ from time import sleep
 
 from github import Github
 
-from handlers.issue_handler import IssueHandler
+from handlers.branch_handler import BranchHandler
 from handlers.commit_handler import CommitHandler
-from handlers.tag_handler import TagHandler
+from handlers.issue_handler import IssueHandler
 from handlers.repo_handler import RepoHandler
+from handlers.tag_handler import TagHandler
 
 from utils.connection import connect_to_db
 
@@ -78,8 +79,19 @@ def main():
             if cli_args.issues_only:
                 continue
 
-            # Get branches
+            # Get branches from GitHub
             branches = repo.get_branches()
+
+            # Get branches from DB
+            branch_handler = BranchHandler(cursor)
+            branches_in_db = branch_handler.get_repo_branches(repo.name)
+
+            # Remove irrelevant branches from DB
+            for b_name, b_id in branches_in_db.items():
+                if b_name not in branches:
+                    branch_handler.remove(b_id)
+
+            # Handle branches
             for branch in branches:
                 # Handle commits
                 commit_handler.handle(repo, branch.name,

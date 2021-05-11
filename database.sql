@@ -20,12 +20,12 @@ CREATE TABLE IF NOT EXISTS commits (id BIGSERIAL PRIMARY KEY, sha TEXT, author_i
 ALTER TABLE commits ADD CONSTRAINT uniq_commits_sha UNIQUE (sha);
 ALTER TABLE commits ADD CONSTRAINT fk_author_id FOREIGN KEY (author_id) REFERENCES contributors (id);
 ALTER TABLE commits ADD CONSTRAINT fk_repo_id FOREIGN KEY (repo_id) REFERENCES repos (id);
-ALTER TABLE commits ADD CONSTRAINT fk_branch_id FOREIGN KEY (branch_id) REFERENCES branches (id);
+ALTER TABLE commits ADD CONSTRAINT fk_branch_id FOREIGN KEY (branch_id) REFERENCES branches (id) ON DELETE CASCADE;
 
 -- Create a table to store tags data and link it with repo table
 CREATE TABLE IF NOT EXISTS tags (id SERIAL PRIMARY KEY, name TEXT, repo_id INT, tarball BOOLEAN, commit_id BIGINT);
 ALTER TABLE tags ADD CONSTRAINT fk_repo_id FOREIGN KEY (repo_id) REFERENCES repos (id);
-ALTER TABLE tags ADD CONSTRAINT fk_commit_id FOREIGN KEY (commit_id) REFERENCES commits (id);
+ALTER TABLE tags ADD CONSTRAINT fk_commit_id FOREIGN KEY (commit_id) REFERENCES commits (id) ON DELETE CASCADE;
 
 -- Create a table to store issues and pull requests
 CREATE TABLE issues (id BIGINT PRIMARY KEY, repo_id INT, number INT, is_issue BOOLEAN, state TEXT, author_id BIGINT, title TEXT, ts_created TIMESTAMP, ts_updated TIMESTAMP, ts_closed TIMESTAMP, comment_cnt BIGINT);
