@@ -61,6 +61,27 @@
       <p>No information available.</p>
     {% endif %}
 
+    <p></p>
+
+    {% if contributors %}
+    <table>
+
+      <th>Contributors</th><th>Email</th><th>Commit Num</th><th>Last Commit TS</th>
+
+      {% for cntr in contributors %}
+        <tr>
+            <td>{{ cntr.login }}</td>
+            <td>{{ cntr.email }}</td>
+            <td>{{ cntr.commit_num }}</td>
+            <td>{{ cntr.last_commit_ts|date:'Y-m-d' }}</td>
+        </tr>
+        </tr>
+      {% endfor %}
+
+    </table>
+    {% else %}
+      <p>No information available.</p>
+    {% endif %}
 
   </body>
 </html>

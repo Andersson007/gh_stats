@@ -2,7 +2,7 @@ from operator import itemgetter
 
 from django.shortcuts import render
 
-from .models import Repos, Branches
+from .models import Branches, Contributors, Repos
 
 
 def index(request):
@@ -115,8 +115,21 @@ def repo_display(request, repo_name):
 
     branches = Branches.objects.raw(query, (repo_name,))
 
+    # TODO: move out to a separate function
+    # Get contributors info
+    query = ('SELECT a.id, a.login, a.email, count(c.id) AS commit_num, '
+             'max(c.ts) AS "last_commit_ts" '
+             'FROM commits AS c LEFT JOIN contributors AS a '
+             'ON a.id = c.author_id LEFT JOIN repos AS r '
+             'ON c.repo_id = r.id WHERE r.name = %s '
+             'GROUP BY a.id, c.author_id, a.login, a.email '
+             'ORDER BY commit_num DESC')
+
+    contributors = Contributors.objects.raw(query, (repo_name,))
+
     context = {
         'branches': branches,
+        'contributors': contributors,
         'repo_name': repo_name,
         'tag_list': ret_list,
     }
