@@ -3,6 +3,8 @@
 
 import sys
 
+from datetime import datetime
+
 from time import sleep
 
 from github import Github
@@ -50,6 +52,7 @@ def main():
         if cli_args.repo:
             repos_needed = extract_repos(cli_args.repo)
 
+        repos_to_skip = None
         if cli_args.skip_repo:
             repos_to_skip = extract_repos(cli_args.skip_repo)
 
@@ -66,23 +69,30 @@ def main():
         # Get repos from GH and do main job
         for repo in repos:
             # Skip what we don't need
-            if (repos_needed and repo.name not in repos_needed):
+            if repos_needed and repo.name not in repos_needed:
                 continue
 
-            if repo.name in repos_to_skip:
+            if repos_to_skip and repo.name in repos_to_skip:
                 continue
 
             # If we don't have it now, add repo to DB
             if repo.name not in repos_in_db:
                 repo_handler.add(repo.name)
 
+            print(repo.name, end=' ')
+            start_time = datetime.now()
+
             if cli_args.repos_only:
+                end_time = datetime.now()
+                print('done, took %s' % str(end_time - start_time))
                 continue
 
             # Handle issues
             issue_handler.handle(repo)
 
             if cli_args.issues_only:
+                end_time = datetime.now()
+                print('done, took %s' % str(end_time - start_time))
                 continue
 
             # Get branches from GitHub
@@ -108,6 +118,9 @@ def main():
 
             # Handle tags
             tag_handler.handle(repo)
+
+            end_time = datetime.now()
+            print('done, took %s' % str(end_time - start_time))
 
             if cli_args.pause:
                 sleep(int(cli_args.pause))
