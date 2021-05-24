@@ -50,6 +50,9 @@ def main():
         if cli_args.repo:
             repos_needed = extract_repos(cli_args.repo)
 
+        if cli_args.skip_repo:
+            repos_to_skip = extract_repos(cli_args.skip_repo)
+
         # Get orgs
         gh_org = gh.get_organization(cli_args.org)
 
@@ -63,7 +66,10 @@ def main():
         # Get repos from GH and do main job
         for repo in repos:
             # Skip what we don't need
-            if repos_needed and repo.name not in repos_needed:
+            if (repos_needed and repo.name not in repos_needed):
+                continue
+
+            if repo.name in repos_to_skip:
                 continue
 
             # If we don't have it now, add repo to DB

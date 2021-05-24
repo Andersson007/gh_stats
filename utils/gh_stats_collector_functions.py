@@ -34,6 +34,11 @@ def get_cli_args():
                         help='GitHub repository name or comma-separated list of names',
                         metavar='REPO_NAME')
 
+    skip_msg = ('Repository name or comma-separated list of names to skip '
+                'handling (not to call GitHub API')
+    parser.add_argument('--skip', dest='skip_repo',
+                        help=skip_msg, metavar='REPO_NAME')
+
     # Update the repo list only in DB
     parser.add_argument('--repos-only', dest='repos_only',
                         help='Fetch and update repo list only',
