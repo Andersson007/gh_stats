@@ -103,9 +103,10 @@ def main():
             branches_in_db = branch_handler.get_repo_branches(repo.name)
 
             # Remove irrelevant branches from DB
-            for b_name, b_id in branches_in_db.items():
-                if b_name not in branches:
-                    branch_handler.remove(b_id)
+            if branches_in_db:
+                for b_name, b_id in branches_in_db.items():
+                    if b_name not in branches:
+                        branch_handler.remove(b_id)
 
             # Handle branches
             for branch in branches:
