@@ -6,12 +6,6 @@ import sys
 from argparse import ArgumentParser, Namespace
 from configparser import ConfigParser
 
-from github import Repository
-
-from psycopg2.extensions import cursor as PgCursor
-
-from utils.connection import exec_in_db
-
 
 def get_cli_args():
     """Get command-line arguments."""
@@ -33,6 +27,11 @@ def get_cli_args():
     parser.add_argument('-r', '--repo', dest='repo',
                         help='GitHub repository name or comma-separated list of names',
                         metavar='REPO_NAME')
+
+    # Repo num to handle per hour
+    parser.add_argument('--repo-num', dest='repo_num',
+                        help='GitHub repository number to handle per hour',
+                        metavar='NUM')
 
     skip_msg = ('Repository name or comma-separated list of names to skip '
                 'handling (not to call GitHub API')

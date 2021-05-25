@@ -66,6 +66,11 @@ def main():
 
         repos = gh_org.get_repos()
 
+        repo_num_per_hour = None
+        if cli_args.repo_num:
+            repo_num_per_hour = cli_args.repo_num
+
+        repo_counter = 0
         # Get repos from GH and do main job
         for repo in repos:
             # Skip what we don't need
@@ -74,6 +79,13 @@ def main():
 
             if repos_to_skip and repo.name in repos_to_skip:
                 continue
+
+            # To avoid exceeding GitHub API limits,
+            # handle the passed number of repos and then sleep for an hour
+            if repo_num_per_hour and repo_num_per_hour == repo_counter:
+                repo_counter = 0
+                print('Will sleep for an hour')
+                sleep(3600)
 
             # If we don't have it now, add repo to DB
             if repo.name not in repos_in_db:
