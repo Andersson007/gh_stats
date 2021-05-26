@@ -13,7 +13,7 @@ ALTER TABLE repos ADD CONSTRAINT uniq_repos_name UNIQUE (name);
 
 -- Create a table to store branches
 CREATE TABLE IF NOT EXISTS branches (id BIGSERIAL PRIMARY KEY, name TEXT, repo_id INT);
-ALTER TABLE branches ADD CONSTRAINT fk_repo_id FOREIGN KEY (repo_id) REFERENCES repos (id);
+ALTER TABLE branches ADD CONSTRAINT fk_repo_id FOREIGN KEY (repo_id) REFERENCES repos (id) ON DELETE CASCADE;
 
 -- Create a table to store commits
 CREATE TABLE IF NOT EXISTS commits (id BIGSERIAL PRIMARY KEY, sha TEXT, author_id BIGINT, repo_id INT, ts TIMESTAMP, branch_id INT);
