@@ -79,7 +79,7 @@ def get_latest_releases():
 
     repo_tag_commit = []
     for key, val in tmp_dict.items():
-        repo_tag_commit.append([key, [val['tag'], val['commit']]])
+        repo_tag_commit.append([key, val['tag'], val['commit']])
 
     repo_tag_commit.sort(key=itemgetter(1), reverse=True)
 
@@ -106,7 +106,7 @@ def export_releases_csv(request):
     repo_tag_commit = get_latest_releases()
 
     for repo in repo_tag_commit:
-        writer.writerow([repo[0], repo[1][0], repo[1][1]])
+        writer.writerow([repo[0], repo[1], repo[1]])
 
     response['Content-Disposition'] = 'attachment; filename="releases.csv"'
 
