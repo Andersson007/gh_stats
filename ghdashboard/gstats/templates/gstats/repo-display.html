@@ -17,10 +17,15 @@
 
   </head>
   <body>
+
     <a href="{% url 'index' %}">Homepage</a>
     <a href="{% url 'repos' %}">Repo list</a>
     <a href="{% url 'repos-branches' %}">Branches</a>
     <a href="{% url 'latest-releases' %}">Latest releases</a>
+
+    <form>
+       <input type="button" value="Go back" onclick="history.back()">
+    </form>
 
     <p><b>{{ repo_name }}</b></p>
 
