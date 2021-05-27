@@ -9,4 +9,5 @@ urlpatterns = [
     path('repos.html', views.repos, name='repos'),
     path('repo-display/<str:repo_name>', views.repo_display, name='repo-display'),
     path('repos-branches.html', views.repos_and_branches, name='repos-branches'),
+    path('export_releases_csv/', views.export_releases_csv),
 ]

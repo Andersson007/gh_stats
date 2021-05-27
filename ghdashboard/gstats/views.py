@@ -1,5 +1,8 @@
+from csv import writer as csv_writer
+
 from operator import itemgetter
 
+from django.http import HttpResponse
 from django.shortcuts import render
 
 from .models import Branches, Contributors, Repos
@@ -48,8 +51,8 @@ def repos_and_branches(request):
     return render(request, 'gstats/repos-branches.html', context)
 
 
-def latest_releases(request):
-    """Global releases info: latest release, latest commit."""
+def get_latest_releases():
+    # TODO: move to a library
     query = ('SELECT r.id, r.name, max(c.ts) AS latest_tag '
              'FROM tags AS t LEFT JOIN commits AS c ON c.id = t.commit_id '
              'LEFT JOIN repos AS r ON r.id = t.repo_id '
@@ -80,11 +83,34 @@ def latest_releases(request):
 
     repo_tag_commit.sort(key=itemgetter(1), reverse=True)
 
+    return repo_tag_commit
+
+
+def latest_releases(request):
+    """Global releases info: latest release, latest commit."""
+    repo_tag_commit = get_latest_releases()
+
     context = {
         'latest_releases': repo_tag_commit,
     }
 
     return render(request, 'gstats/latest-releases.html', context)
+
+
+def export_releases_csv(request):
+    response = HttpResponse(content_type='text/csv')
+
+    writer = csv_writer(response)
+    writer.writerow(['Repo name', 'Latest release', 'Latest commit'])
+
+    repo_tag_commit = get_latest_releases()
+
+    for repo in repo_tag_commit:
+        writer.writerow([repo[0], repo[1][0], repo[1][1]])
+
+    response['Content-Disposition'] = 'attachment; filename="releases.csv"'
+
+    return response
 
 
 def repo_display(request, repo_name):

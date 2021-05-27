@@ -20,6 +20,9 @@
     <a href="{% url 'index' %}">Homepage</a>
     <p></p>
     {% if latest_releases %}
+
+    <p><h4><a href="export_releases_csv">Export to CSV</a></h4></p>
+
     <table>
 
       <th>Repo name</th><th>Latest release</th><th>Latest commit</th><th>Ref</th>
