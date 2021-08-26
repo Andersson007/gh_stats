@@ -34,7 +34,7 @@ def get_cli_args():
                         metavar='NUM')
 
     skip_msg = ('Repository name or comma-separated list of names to skip '
-                'handling (not to call GitHub API')
+                'handling (GitHub API will not be called)')
     parser.add_argument('--skip', dest='skip_repo',
                         help=skip_msg, metavar='REPO_NAME')
 
