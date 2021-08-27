@@ -28,11 +28,6 @@ def get_cli_args():
                         help='GitHub repository name or comma-separated list of names',
                         metavar='REPO_NAME')
 
-    # Repo num to handle per hour
-    parser.add_argument('--repo-num', dest='repo_num',
-                        help='GitHub repository number to handle per hour',
-                        metavar='NUM')
-
     skip_msg = ('Repository name or comma-separated list of names to skip '
                 'handling (GitHub API will not be called)')
     parser.add_argument('--skip', dest='skip_repo',
@@ -61,11 +56,6 @@ def get_cli_args():
 
     parser.add_argument('-p', '--password', dest='password',
                         help='Database password', metavar='DBPASS')
-
-    # Other parameters
-    parser.add_argument('--pause', dest='pause',
-                        help='Pause between requests to GitHub API in seconds',
-                        metavar='SEC')
 
     args = parser.parse_args()
 
